@@ -83,7 +83,28 @@ namespace sodiumpp {
     void crypto_onetimeauth_verify(const std::string &a,const std::string &m,const std::string &k);
     std::string crypto_scalarmult_base(const std::string &n);
     std::string crypto_scalarmult(const std::string &n,const std::string &p);
+	/**
+	 * Encrypts and authenticates a message m using a secret key k and a nonce n.
+	 * @param m message
+	 * @param n nonce
+	 * @param k secret key
+	 * @returns the resulting ciphertext
+	 * @throw std::invalid_argument if (k.size() != crypto_secretbox_KEYBYTES)
+	 * or (n.size() != crypto_secretbox_NONCEBYTES)
+	 * Exception safety: Strong exception safety
+	 */
     std::string crypto_secretbox(const std::string &m,const std::string &n,const std::string &k);
+	/**
+	 * Verifies and decrypts a ciphertext c using a secret key k and a nonce n.
+	 * @param c ciphertext
+	 * @param n nonce
+	 * @param k secret key
+	 * @returns the resulting plaintext
+	 * @throw std::invalid_argument if (k.size() != crypto_secretbox_KEYBYTES)
+	 * or (n.size() != crypto_secretbox_NONCEBYTES)
+	 * @throw sodiumpp::crypto_error if fails verification
+	 * Exception safety: Strong exception safety
+	 */
     std::string crypto_secretbox_open(const std::string &c,const std::string &n,const std::string &k);
     /**
      * Generate a new keypair for sign operations.
