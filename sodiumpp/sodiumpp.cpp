@@ -23,6 +23,7 @@
 
 #include <sodiumpp/sodiumpp.h>
 #include <sodiumpp/z85.hpp>
+#include <cassert>
 
 std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)
 {
@@ -150,6 +151,16 @@ std::string sodiumpp::crypto_hash(const std::string &m)
     ::crypto_hash(h,(const unsigned char *) m.c_str(),m.size());
     return std::string((char *) h,sizeof h);
 }
+
+std::string sodiumpp::crypto_generichash(const std::string &m, size_t output_len, const std::string &k) {
+	std::string h(output_len, 0);
+	assert(h.size() == output_len);
+	::crypto_generichash(reinterpret_cast<unsigned char *>(&h[0]), h.size(),
+						reinterpret_cast<const unsigned char *>(m.c_str()), m.size(),
+						reinterpret_cast<const unsigned char *>(k.c_str()), k.size());
+	return h;
+}
+
 
 std::string sodiumpp::crypto_onetimeauth(const std::string &m,const std::string &k)
 {

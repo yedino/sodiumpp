@@ -78,7 +78,23 @@ namespace sodiumpp {
      * Throws crypto_error if the ciphertext fails verification, throws std::invalid_argument if any of the arguments are invalid.
      */
     std::string crypto_box_open_afternm(const std::string &c,const std::string &n,const std::string &k);
+	/**
+	 * Function hashes a message m. It returns a hash h. The output length h.size() is always crypto_hash_BYTES.
+	 * Hash function: SHA 512
+	 */
     std::string crypto_hash(const std::string &m);
+
+	/**
+	 * Function hashes a message m. It returns a hash h.
+	 * @param m message to hash
+	 * @param output_len size of output string The minimum recommended output size is crypto_generichash_BYTES. This size makes it practically
+	 * impossible for two messages to produce the same fingerprint. But for specific use cases, the size can be any value
+	 * between crypto_generichash_BYTES_MIN (included) and crypto_generichash_BYTES_MAX (included).
+	 * @param k key
+	 * Hash function: BLAKE2b
+	 */
+	std::string crypto_generichash(const std::string &m, size_t output_len, const std::string &k = "");
+
     std::string crypto_onetimeauth(const std::string &m,const std::string &k);
     void crypto_onetimeauth_verify(const std::string &a,const std::string &m,const std::string &k);
     std::string crypto_scalarmult_base(const std::string &n);
@@ -116,8 +132,12 @@ namespace sodiumpp {
     std::string crypto_stream(size_t clen,const std::string &n,const std::string &k);
     std::string crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k);
     std::string crypto_shorthash(const std::string& m, const std::string& k);
+	/**
+	 * @param size size of returned string
+	 * @returns random string
+	 */
     std::string randombytes(size_t size);
-    
+
     /**
      * Encode the binary string bytes to a hexadecimally encoded string, 2 lowercase hexadecimal digits per byte.
      */
