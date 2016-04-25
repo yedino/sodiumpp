@@ -73,10 +73,11 @@ std::string sodiumpp::crypto_box_keypair(std::string& sk_string)
     return std::string((char *) pk,sizeof pk);
 }
 
-std::string sodiumpp::crypto_box_beforenm(const std::string &pk, const std::string &sk) {
+const std::string sodiumpp::crypto_box_beforenm(const std::string &pk, const std::string &sk) {
     if (pk.size() != crypto_box_PUBLICKEYBYTES) throw std::invalid_argument("incorrect public-key length");
     if (sk.size() != crypto_box_SECRETKEYBYTES) throw std::invalid_argument("incorrect secret-key length");
-    std::string k(crypto_box_BEFORENMBYTES, 0);
+    const std::string k(crypto_box_BEFORENMBYTES, 0);
+    mlock(k);
     ::crypto_box_beforenm((unsigned char *)&k[0], (const unsigned char *)&pk[0], (const unsigned char *)&sk[0]);
     return k;
 }

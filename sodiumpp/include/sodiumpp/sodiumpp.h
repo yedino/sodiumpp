@@ -56,7 +56,7 @@ namespace sodiumpp {
      * This function takes a receiver public key pk and a sender secret key sk, and returns the k parameter that should be used in afternm.
      * Throws std::invalid_argument if any of the arguments are invalid.
      */
-    std::string crypto_box_beforenm(const std::string &pk, const std::string &sk);
+    const std::string crypto_box_beforenm(const std::string &pk, const std::string &sk);
     /**
      * If many box operations are performed between the same pair of keypairs,
      * The operation can be split in beforenm, which is performed once and afternm, 
@@ -160,7 +160,7 @@ namespace sodiumpp {
 	void mlock(T & bytes)
 	{
 		static_assert(std::is_const<T>::value, "use non-const variable to mlock");
-		sodium_mlock(reinterpret_cast<unsigned char *>(&bytes[0]), bytes.size());
+		sodium_mlock(reinterpret_cast<void * const>(const_cast<char*>(bytes.data())), bytes.size());
 	}
     /**
      * Unlocks the memory used by the string bytes, allowing it to be swapped out again.
@@ -497,7 +497,7 @@ namespace sodiumpp {
     class boxer {
     private:
         noncetype n;
-        std::string k;
+        const std::string k;
     public:
         /**
          * Construct from the receiver's public key pk and the sender's secret key sk
@@ -505,9 +505,9 @@ namespace sodiumpp {
         boxer(const box_public_key& pk, const box_secret_key& sk) : boxer(pk, sk, encoded_bytes("", encoding::binary)) {}
         /**
          * Construct from the receiver's public key pk, the sender's secret key sk and an encoded constant part for the nonces.
+         *
          */
-        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : k(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
-            mlock(k);
+        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : k(std::move(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary()))), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
         }
         /**
          * Returns the current nonce.
