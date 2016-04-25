@@ -324,10 +324,6 @@ void sodiumpp::memzero(std::string& bytes) {
     sodium_memzero((unsigned char *)&bytes[0], bytes.size());
 }
 
-void sodiumpp::mlock(std::string& bytes) {
-    sodium_mlock((unsigned char *)&bytes[0], bytes.size());
-}
-
 void sodiumpp::munlock(std::string& bytes) {
     sodium_munlock((unsigned char *)&bytes[0], bytes.size());
 }

@@ -27,6 +27,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <type_traits>
 
 extern "C" {
 #include <sodium.h>
@@ -153,8 +154,14 @@ namespace sodiumpp {
     void memzero(std::string& bytes);
     /**
      * Locks the memory used by the string bytes in memory, preventing it from being swapped out.
+     * @param bytes must be always const
      */
-    void mlock(std::string& bytes);
+	template <class T>
+	void mlock(T & bytes)
+	{
+		static_assert(std::is_const<T>::value, "use non-const variable to mlock");
+		sodium_mlock(reinterpret_cast<unsigned char *>(&bytes[0]), bytes.size());
+	}
     /**
      * Unlocks the memory used by the string bytes, allowing it to be swapped out again.
      */
