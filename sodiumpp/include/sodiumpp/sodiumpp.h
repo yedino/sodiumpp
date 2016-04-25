@@ -622,7 +622,7 @@ namespace sodiumpp {
         unboxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant) :
         // TODO: make sure the k is mlock'ed before it is initialized with a value
-        	k(secret_shared_key), n(nonce_constant, use_nonce_even)
+        	k(secret_shared_key.to_binary()), n(nonce_constant, use_nonce_even)
         {
             mlock(k);
         }
