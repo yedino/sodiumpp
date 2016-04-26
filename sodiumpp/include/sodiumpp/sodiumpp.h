@@ -440,7 +440,7 @@ namespace sodiumpp {
     protected:
         std::string k;
     public:
-    	boxer_base( const std::string & _k );
+    	boxer_base( const std::string & _k ) :k(_k){}
 
     	struct boxer_type_shared_key{}; // just a tag, to "name" the constructor
 
@@ -497,7 +497,7 @@ namespace sodiumpp {
          * calls this with use nonce_is_even==true and other with ==false, otherwise this will be insecure!
          * (though we hope such case would be detecte/asserted by recipient, so it should come up in testing)
          */
-        boxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key,
+        boxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant)
         // TODO: make sure the k is mlock'ed before it is initialized with a value
         : boxer_base(secret_shared_key.to_binary()),
@@ -506,7 +506,7 @@ namespace sodiumpp {
         	mlock(k);
       	}
 
-        boxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key)
+        boxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key)
         : boxer( boxer_type_shared_key() , use_nonce_even , secret_shared_key,  encoded_bytes("", encoding::binary) )
         {	}
 
@@ -582,7 +582,7 @@ namespace sodiumpp {
         /**
         * Construct from the secret shared-key, and possibly with using a nonce_constant.
         */
-        unboxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key,
+        unboxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant) :
         // TODO: make sure the k is mlock'ed before it is initialized with a value
         	boxer_base(secret_shared_key.bytes), n(nonce_constant, use_nonce_even)
