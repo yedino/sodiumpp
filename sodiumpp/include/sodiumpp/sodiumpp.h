@@ -434,6 +434,19 @@ namespace sodiumpp {
         s << bin2hex(n.constant()) << " - " << bin2hex(n.sequential());
         return s;
     }
+
+
+    class boxer_base {
+    protected:
+        std::string k;
+    public:
+    	boxer_base( const std::string & _k );
+
+    	struct boxer_type_shared_key{}; // just a tag, to "name" the constructor
+
+   	protected:
+   		~boxer_base()=default; // to forbid using pointers to this not-virtual base class.
+		};
     
     /**
      * Boxer suppots both public-key crypto and symmetric crypto - it has two possible uses:
@@ -467,9 +480,7 @@ namespace sodiumpp {
     class boxer {
     private:
         noncetype n;
-        std::string k;
     public:
-    		struct boxer_type_shared_key{}; // just a tag, to "name" the constructor
 
         /**
          * Construct from the receiver's public key pk and the sender's secret key sk
