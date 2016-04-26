@@ -158,6 +158,10 @@ namespace sodiumpp {
          */
         encoded_bytes(const std::string& bytes, enum encoding enc) : bytes(bytes), enc(enc) {}
         /**
+         * Default constructor creating empty string
+         */
+         encoded_bytes() : encoded_bytes("",encoding::binary) {}
+        /**
          * Convenience method for quickly getting the binary string corresponding to the encoded bytes.
          */
         std::string to_binary() const { return decode_to_binary(bytes, enc); }
@@ -167,6 +171,7 @@ namespace sodiumpp {
         encoded_bytes to(enum encoding new_encoding) {
             return encoded_bytes(encode_from_binary(to_binary(), new_encoding), new_encoding);
         }
+
     };
     
     /**
@@ -580,7 +585,7 @@ namespace sodiumpp {
         * Construct from the secret shared-key, and possibly with using a nonce_constant.
         */
         unboxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key,
-        	const encoded_bytes& nonce_constant) :
+        	const encoded_bytes& nonce_constant = encoded_bytes() ) :
         // TODO: make sure the k is mlock'ed before it is initialized with a value
         	boxer_base(secret_shared_key.bytes), n(nonce_constant, use_nonce_even)
         {
