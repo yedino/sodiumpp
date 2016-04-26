@@ -569,10 +569,7 @@ namespace sodiumpp {
     class unboxer final : public boxer_base {
     private:
         noncetype n;
-        std::string k;
     public:
-    		struct boxer_type_shared_key{}; // just a tag, to "name" the constructor
-
         /**
          * Construct from the sender's public key pk, the receiver's secret key sk and an encoded constant part for the nonces.
          */
