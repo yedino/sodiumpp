@@ -477,7 +477,7 @@ namespace sodiumpp {
      * 
      */
     template <typename noncetype>
-    class boxer {
+    class boxer final : public boxer_base {
     private:
         noncetype n;
     public:
@@ -489,7 +489,7 @@ namespace sodiumpp {
         /**
          * Construct from the receiver's public key pk, the sender's secret key sk and an encoded constant part for the nonces.
          */
-        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : k(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
+        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
             mlock(k);
         }
         /**
@@ -500,7 +500,7 @@ namespace sodiumpp {
         boxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant)
         // TODO: make sure the k is mlock'ed before it is initialized with a value
-        : k(secret_shared_key.to_binary()),
+        : boxer_base(secret_shared_key.to_binary()),
         n( nonce_constant , use_nonce_even )
         {
         	mlock(k);
@@ -566,7 +566,7 @@ namespace sodiumpp {
      * The beforenm parameter is locked into memory for the lifetime of the unboxer and securely erased at destroy time.
      */
     template <typename noncetype>
-    class unboxer {
+    class unboxer final : public boxer_base {
     private:
         noncetype n;
         std::string k;
@@ -576,7 +576,7 @@ namespace sodiumpp {
         /**
          * Construct from the sender's public key pk, the receiver's secret key sk and an encoded constant part for the nonces.
          */
-        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : k(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary()) {
+        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary()) {
             mlock(k);
         }
         /**
@@ -585,7 +585,7 @@ namespace sodiumpp {
         unboxer(boxer_type_shared_key &, bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant) :
         // TODO: make sure the k is mlock'ed before it is initialized with a value
-        	k(secret_shared_key), n(nonce_constant, use_nonce_even)
+        	boxer_base(secret_shared_key.bytes), n(nonce_constant, use_nonce_even)
         {
             mlock(k);
         }
