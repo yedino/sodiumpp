@@ -457,7 +457,7 @@ namespace sodiumpp {
      * Boxer suppots both public-key crypto and symmetric crypto - it has two possible uses:
      * 1)
      * Boxes a series of messages between sender's secret key and a receiver's public key using automatically generated nonces.
-     * The sequential part of nonces is even if the sender's public key is lexicographically smaller than the receiver's public key, and uneven otherwise.
+     * The sequential part of nonces is even if the sender's public key is lexicographically smaller than the receiver's public key, and uneven (odd, not divisible by 2) otherwise.
      *
      * The constant part of nonces is randomly generated or supplied by the user.
      * In case of public-key it optimizes operation:
@@ -498,9 +498,9 @@ namespace sodiumpp {
             mlock(k);
         }
         /**
-         * Construct from the secret shared-key. You must make sure that one side of connection
+         * Construct from the secret shared-key. You must make sure that one side of the connection
          * calls this with use nonce_is_even==true and other with ==false, otherwise this will be insecure!
-         * (though we hope such case would be detecte/asserted by recipient, so it should come up in testing)
+         * (though we hope such case would be detected/asserted by recipient, so it should come up in testing)
          */
         boxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key,
         	const encoded_bytes& nonce_constant)
@@ -553,7 +553,7 @@ namespace sodiumpp {
     };
     
     /**
-     * Unboxer suppots both public-key crypto and symmetric crypto - it has two possible uses:
+     * Unboxer supports both public-key crypto and symmetric crypto - it has two possible uses:
      * 1)
      * Unboxes a series of messages between sender's public key and a receiver's secret key using automatically generated nonces.
      * or
