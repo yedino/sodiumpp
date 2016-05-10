@@ -23,6 +23,7 @@
 
 #include <sodiumpp/sodiumpp.h>
 #include <sodiumpp/z85.hpp>
+#include <cassert>
 
 std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)
 {
@@ -64,10 +65,10 @@ std::string sodiumpp::crypto_box(const std::string &m,const std::string &n,const
                   );
 }
 
-std::string sodiumpp::crypto_box_keypair(std::string& sk_string)
+std::string sodiumpp::crypto_box_keypair(locked_string& sk_string)
 {
+    assert(sk_string.size() == crypto_box_SECRETKEYBYTES);
     unsigned char pk[crypto_box_PUBLICKEYBYTES];
-    sk_string.resize(crypto_box_SECRETKEYBYTES, 0);
     ::crypto_box_keypair(pk,(unsigned char *)&sk_string[0]);
     return std::string((char *) pk,sizeof pk);
 }
@@ -222,10 +223,10 @@ std::string sodiumpp::crypto_secretbox_open(const std::string &c,const std::stri
                   );
 }
 
-std::string sodiumpp::crypto_sign_keypair(std::string &sk_string)
+std::string sodiumpp::crypto_sign_keypair(locked_string &sk_string)
 {
     unsigned char pk[crypto_sign_PUBLICKEYBYTES];
-    sk_string.resize(crypto_sign_SECRETKEYBYTES, 0);
+    assert(sk_string.size() == crypto_sign_SECRETKEYBYTES);
     ::crypto_sign_keypair(pk,(unsigned char *)&sk_string[0]);
     return std::string((char *) pk,sizeof pk);
 }

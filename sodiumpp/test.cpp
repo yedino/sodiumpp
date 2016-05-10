@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <sodiumpp/sodiumpp.h>
+#include <sodiumpp/locked_string.h>
 #include <bandit/bandit.h>
 
 using namespace sodiumpp;
@@ -78,6 +79,39 @@ go_bandit([](){
             n.increment();
             AssertThrows(std::overflow_error, n.get());
             AssertThrows(std::overflow_error, n.next());
+        });
+    });
+
+    describe("locked_string", [](){
+        std::string data;
+        before_each([&](){
+            data = "abcd";
+        });
+        it("can move from not locked", [&](){
+            const char * const source_data_ptr = &data[0];
+            locked_string ls = locked_string::move_from_not_locked_string(std::move(data));
+            AssertThat(source_data_ptr, Equals(&ls[0]));
+        });
+        it("can move from locked", [&](){
+            const char *source_data_ptr = &data[0];
+            sodiumpp::mlock(data);
+            locked_string ls = locked_string::move_from_not_locked_string(std::move(data));
+            AssertThat(source_data_ptr, Equals(&ls[0]));
+        });
+        it("can create copy", [&](){
+            locked_string ls(data);
+            AssertThat(ls.size(), Equals(data.size()));
+            AssertThat(sodium_memcmp(ls.data(), data.data(), data.size()), Equals(0));
+            AssertThat(ls.size(), Equals(4));
+        });
+        it("can compare", [&](){
+            locked_string ls1(data);
+            locked_string ls2(data);
+            AssertThat(ls1==ls2, Equals(true));
+            AssertThat(ls1!=ls2, Equals(false));
+            ls2.back() = 'z';
+            AssertThat(ls1==ls2, Equals(false));
+            AssertThat(ls1!=ls2, Equals(true));
         });
     });
 });
