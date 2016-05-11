@@ -23,13 +23,16 @@ class locked_string final
             explicit locked_string(std::string && str) noexcept; ///< only move, not call mlock()
     public:
             locked_string() = default;
-            locked_string(const locked_string &) = default;
+            locked_string(const locked_string &) = delete; ///< TODO write secure version of it
             locked_string(locked_string &&) = default;
-            locked_string &operator=(const locked_string &) = default;
-            locked_string &operator=(locked_string &&) = default;
+            locked_string &operator=(const locked_string &) = delete;
+            locked_string &operator=(locked_string &&) = default; ///< TODO write secure version of it
 
             /**
-             * @brief create locked string form non locked std::string, copy internal array
+             * @brief create locked string form non locked std::string, copy internal array.
+             * @note Of course the current value of string str already was probably leaked,
+             * because it was probably existing as a std::string before call to us,
+             * therefore rather use constructor from locked_string
              * @param str
              */
             explicit locked_string(const std::string &str);
@@ -56,7 +59,8 @@ class locked_string final
             ~locked_string();
 
             /**
-             * @return const reference to internal locked std::string
+             * @return const reference to internal locked std::string, this does not yet make a copy of the data
+             * but of course do NOT save result of it into a non-reference value std::string.
              */
             const std::string & get_string() const;
 
@@ -68,7 +72,15 @@ class locked_string final
             bool operator!=(const locked_string &rhs);
 
             /**
+             * @name Secure getters
+             * Secure getters, that do not make any copy of the locked memory content.
+             * @{
+            */
+
+            /**
+             * @name basic
              * std::string const funtions and non-const listed in 21.4.1.5
+             * @{
              */
             size_t size() const noexcept;
             bool empty() const noexcept;
@@ -80,13 +92,19 @@ class locked_string final
             const char &back() const;
             char &front();
             const char &front() const;
+            /// @}
 
             /**
-             * Do not compare this memory direct (i.e. using memcmp())
+             * @name entire string
+             * @note Do not compare this memory direct (i.e. using memcmp())
              * Use safe operators "==" and "!="
+             * @{
              */
             const char *c_str() const noexcept;
             const char *data() const noexcept;
+            /// @}
+
+            /// @}
 };
 
 } // namespace

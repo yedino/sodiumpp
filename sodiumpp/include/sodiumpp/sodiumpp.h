@@ -99,6 +99,7 @@ namespace sodiumpp {
     std::string crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k);
     std::string crypto_shorthash(const std::string& m, const std::string& k);
     std::string randombytes(size_t size);
+		sodiumpp::locked_string randombytes_locked(size_t size); ///< the bytes are in locked (safe) memory
     
     /**
      * Encode the binary string bytes to a hexadecimally encoded string, 2 lowercase hexadecimal digits per byte.

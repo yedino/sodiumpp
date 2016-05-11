@@ -335,6 +335,13 @@ std::string sodiumpp::randombytes(size_t size) {
     return buf;
 }
 
+sodiumpp::locked_string sodiumpp::randombytes_locked(size_t size) {
+    sodiumpp::locked_string buf_locked(size);
+    assert( buf_locked.size() == size );
+    randombytes_buf( static_cast<void*>( & buf_locked.front() ) , size);
+    return buf_locked;
+}
+
 std::string sodiumpp::encode_from_binary(const std::string& binary_bytes, sodiumpp::encoding enc) {
     switch(enc) {
         case encoding::binary:
