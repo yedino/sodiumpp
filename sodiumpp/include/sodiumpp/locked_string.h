@@ -23,10 +23,14 @@ class locked_string final
             explicit locked_string(std::string && str) noexcept; ///< only move, not call mlock()
     public:
             locked_string() = default;
-            locked_string(const locked_string &) = delete; ///< TODO write secure version of it
+            locked_string(const locked_string &);
             locked_string(locked_string &&) = default;
-            locked_string &operator=(const locked_string &) = delete;
-            locked_string &operator=(locked_string &&) = default; ///< TODO write secure version of it
+            locked_string & operator=(const locked_string &);
+            locked_string & operator=(locked_string &&) = default;
+
+            // TODO: prove with standard c++11, that default move constructor of std::string
+            // will preserve the address of memory of it's data - address of & .at(0)
+            // or else write own secure versions of move constructors
 
             /**
              * @brief create locked string form non locked std::string, copy internal array.

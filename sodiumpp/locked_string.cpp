@@ -10,6 +10,7 @@ locked_string::locked_string(std::string &&str) noexcept
 }
 
 locked_string::locked_string(const std::string &str) {
+		// TODO factor out the common part of all this constructors etc
     m_str.resize(str.size());
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
@@ -19,11 +20,34 @@ locked_string::locked_string(const std::string &str) {
 }
 
 locked_string::locked_string(size_t size) {
-    std::string str(size, 0);
-    assert(str.size() == size);
-    *this = std::move(locked_string(move_from_not_locked_string(std::move(str))));
-    assert(str.size() == 0);
+		std::string str(size, 0);
+		assert(str.size() == size);
+		*this = std::move(locked_string(move_from_not_locked_string(std::move(str))));
+		assert(str.size() == 0);
     assert(m_str.size() == size);
+}
+
+locked_string::locked_string(const locked_string & str) {
+    m_str.resize(str.size());
+    const char * const data_ptr = &m_str[0];
+    assert(m_str.size() == str.size());
+		sodiumpp::mlock(m_str);
+		m_str = str.get_string();
+    assert(data_ptr == &m_str[0]);
+}
+
+locked_string & locked_string::operator=(const locked_string & str) {
+	sodiumpp::memzero(m_str);
+	sodiumpp::munlock(m_str);
+
+	m_str.resize(str.size());
+	const char * const data_ptr = &m_str[0];
+	assert(m_str.size() == str.size());
+	sodiumpp::mlock(m_str);
+	m_str = str.get_string();
+	assert(data_ptr == &m_str[0]);
+
+	return *this;
 }
 
 locked_string locked_string::move_from_locked_string(std::string &&str) {
