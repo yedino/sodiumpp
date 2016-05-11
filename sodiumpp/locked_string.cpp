@@ -7,11 +7,11 @@ using namespace sodiumpp;
 locked_string::locked_string(std::string &&str) noexcept
 : m_str(std::move(str))
 {
-	assert( str.size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+	assert( str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 }
 
 locked_string::locked_string(const std::string &str) {
-		assert( str.size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+		assert( str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 		// TODO factor out the common part of all this constructors etc
     m_str.resize(str.size());
     const char * const data_ptr = &m_str[0];
@@ -131,5 +131,10 @@ const char *locked_string::c_str() const noexcept {
 
 const char *locked_string::data() const noexcept {
     return m_str.data();
+}
+
+char * locked_string::buffer_writable() noexcept {
+	assert( !m_str.empty() ); // UB to access s[0] if empty
+	return &m_str[0] ;
 }
 

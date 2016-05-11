@@ -192,7 +192,12 @@ sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_st
     if (priv.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
     if (pub.size() != crypto_scalarmult_BYTES) throw std::invalid_argument("incorrect element length");
     locked_string q(crypto_scalarmult_BYTES); // allocate locked memory
-    ::crypto_scalarmult(q.c_str_writable(), (const unsigned char *) priv.c_str(), (const unsigned char *) pub.c_str());
+
+		assert( q.size() == crypto_scalarmult_BYTES ); // because that many bytes will be written by function:
+    ::crypto_scalarmult(
+			(unsigned char *) q.buffer_writable(), // out data
+			(const unsigned char *) priv.c_str(),
+			(const unsigned char *) pub.c_str());
     return q;
 }
 
