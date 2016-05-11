@@ -31,6 +31,7 @@
 extern "C" {
 #include <sodium.h>
 }
+#include <sodiumpp/locked_string.h>
 #include <sodiumpp/z85.hpp>
 
 namespace sodiumpp {
@@ -44,10 +45,11 @@ namespace sodiumpp {
     /**
      * Generate a new keypair for box operations.
      * The secret key is stored in sk_string, and the public key is returned.
+     * sk_string must be initialized by size constructor with size == crypto_box_SECRETKEYBYTES
      * Throws std::invalid_argument if any of the arguments are invalid.
      * This function was changed from the official NaCl API: it accepts a reference instead of a pointer to sk_string.
      */
-    std::string crypto_box_keypair(std::string &sk_string);
+    std::string crypto_box_keypair(locked_string &sk_string);
     /**
      * If many box operations are performed between the same pair of keypairs,
      * The operation can be split in crypto_box_beforenm, which is performed once and crypto_box_afternm, 
@@ -88,8 +90,9 @@ namespace sodiumpp {
     /**
      * Generate a new keypair for sign operations.
      * This function was changed from the official NaCl API: it accepts a reference instead of a pointer to sk_string.
+     * sk_string must be initialized by size constructor with size == crypto_sign_SECRETKEYBYTES
      */
-    std::string crypto_sign_keypair(std::string &sk_string);
+    std::string crypto_sign_keypair(locked_string &sk_string);
     std::string crypto_sign_open(const std::string &sm_string, const std::string &pk_string);
     std::string crypto_sign(const std::string &m_string, const std::string &sk_string);
     std::string crypto_stream(size_t clen,const std::string &n,const std::string &k);
@@ -171,7 +174,6 @@ namespace sodiumpp {
         encoded_bytes to(enum encoding new_encoding) {
             return encoded_bytes(encode_from_binary(to_binary(), new_encoding), new_encoding);
         }
-
     };
     
     /**
@@ -238,7 +240,7 @@ namespace sodiumpp {
     std::ostream& operator<<(std::ostream& stream, const sodiumpp::public_key<P>& pk) {
         return stream << "public_key(\"" << pk.get(encoding::z85).bytes << "\")";
     }
-    
+
     /**
      * Manages generation and safekeeping of a secret key.
      *
@@ -250,14 +252,14 @@ namespace sodiumpp {
      */
     template <key_purpose P>
     class secret_key {
-        std::string secret_bytes;
+        locked_string secret_bytes;
     public:
         const key_purpose purpose = P; /** The purpose of this key */
         public_key<P> pk; /**< The public key corresponding to this secret key */
         /**
          * Construct a secret key from a pregenerated public and secret key.
          */
-        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(secret_bytes.to_binary()) {}
+        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(locked_string::move_from_not_locked_string(secret_bytes.to_binary())) {}
         /**
          * Copy constructor
          */
@@ -268,28 +270,27 @@ namespace sodiumpp {
          */
         secret_key() {
             if(P == key_purpose::box) {
+                secret_bytes = locked_string(crypto_box_SECRETKEYBYTES);
                 pk.bytes = crypto_box_keypair(secret_bytes);
             } else if(P == key_purpose::sign) {
+                secret_bytes = locked_string(crypto_sign_SECRETKEYBYTES);
                 pk.bytes = crypto_sign_keypair(secret_bytes);
             } else {
                 // Should be caught by the static_assert above
                 std::invalid_argument("purposes other than box and sign are not yet supported");
             }
-            mlock(secret_bytes);
         }
         /**
          * Get the encoded bytes of the secret key.
          */
-        encoded_bytes get(encoding enc=encoding::binary) const { return encoded_bytes(encode_from_binary(secret_bytes, enc), enc); }
+        encoded_bytes get(encoding enc=encoding::binary) const { return encoded_bytes(encode_from_binary(secret_bytes.get_string(), enc), enc); }
         /**
          * Securely erase and unlock the memory containing the secret key.
          */
-        ~secret_key() {
-            memzero(secret_bytes);
-            munlock(secret_bytes);
-        }
+        ~secret_key() {}
         bool operator==(const secret_key<P>& other) {
-            return secret_bytes.size() == other.secret_bytes.size() and sodium_memcmp(&secret_bytes[0], &(other.secretbytes[0]), secret_bytes.size()) and pk == other.pk;
+            //return secret_bytes.size() == other.secret_bytes.size() and sodium_memcmp(&secret_bytes[0], &(other.secretbytes[0]), secret_bytes.size()) and pk == other.pk;
+            return secret_bytes == other.secret_bytes;
         }
     };
     
@@ -485,8 +486,8 @@ namespace sodiumpp {
     class boxer final : public boxer_base {
     private:
         noncetype n;
+        locked_string k;
     public:
-
         /**
          * Construct from the receiver's public key pk and the sender's secret key sk
          */
@@ -494,8 +495,7 @@ namespace sodiumpp {
         /**
          * Construct from the receiver's public key pk, the sender's secret key sk and an encoded constant part for the nonces.
          */
-        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
-            mlock(k);
+        boxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : k(locked_string::move_from_not_locked_string(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary()))), n(nonce_constant, sk.pk.get().to_binary() > pk.get().to_binary()) {
         }
         /**
          * Construct from the secret shared-key. You must make sure that one side of the connection
@@ -508,7 +508,6 @@ namespace sodiumpp {
         : boxer_base(secret_shared_key.to_binary()),
         n( nonce_constant , use_nonce_even )
         {
-        	mlock(k);
       	}
 
         boxer(boxer_type_shared_key , bool use_nonce_even, const encoded_bytes& secret_shared_key)
@@ -529,7 +528,7 @@ namespace sodiumpp {
          * The nonce that was used will be put in used_n.
          */
         encoded_bytes box(std::string message, noncetype& used_n, encoding enc=encoding::binary) {
-            std::string c = crypto_box_afternm(message, n.get().to_binary(), k);
+            std::string c = crypto_box_afternm(message, n.get().to_binary(), k.get_string());
             used_n = n;
             n.increment();
             return encoded_bytes(encode_from_binary(c, enc), enc);
@@ -547,8 +546,6 @@ namespace sodiumpp {
          * and unlock the memory that contained it.
          */
         ~boxer() {
-            memzero(k);
-            munlock(k);
         }
     };
     
@@ -574,12 +571,13 @@ namespace sodiumpp {
     class unboxer final : public boxer_base {
     private:
         noncetype n;
+        locked_string k;
     public:
         /**
          * Construct from the sender's public key pk, the receiver's secret key sk and an encoded constant part for the nonces.
          */
-        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary()) {
-            mlock(k);
+        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary()) 
+        {
         }
         /**
         * Construct from the secret shared-key, and possibly with using a nonce_constant.
@@ -589,7 +587,6 @@ namespace sodiumpp {
         // TODO: make sure the k is mlock'ed before it is initialized with a value
         	boxer_base(secret_shared_key.bytes), n(nonce_constant, use_nonce_even)
         {
-            mlock(k);
         }
         /**
          * Returns the current nonce.
@@ -604,7 +601,7 @@ namespace sodiumpp {
          * Automatically increments the nonce after each message.
          */
         std::string unbox(const encoded_bytes& ciphertext) {
-            std::string m = crypto_box_open_afternm(ciphertext.to_binary(), n.get().to_binary(), k);
+            std::string m = crypto_box_open_afternm(ciphertext.to_binary(), n.get().to_binary(), k.get_string());
             n.increment();
             return m;
         }
@@ -621,8 +618,6 @@ namespace sodiumpp {
          * and unlock the memory that contained it.
          */
         ~unboxer() {
-            memzero(k);
-            munlock(k);
         }
     };
 }
