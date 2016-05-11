@@ -188,6 +188,14 @@ std::string sodiumpp::crypto_scalarmult(const std::string &n,const std::string &
     return std::string((char *) q,sizeof q);
 }
 
+sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_string &priv,const std::string &pub) {
+    if (priv.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
+    if (pub.size() != crypto_scalarmult_BYTES) throw std::invalid_argument("incorrect element length");
+    locked_string q(crypto_scalarmult_BYTES); // allocate locked memory
+    ::crypto_scalarmult(q.c_str_writable(), (const unsigned char *) priv.c_str(), (const unsigned char *) pub.c_str());
+    return q;
+}
+
 std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n,const std::string &k)
 {
     if (k.size() != crypto_secretbox_KEYBYTES) throw std::invalid_argument("incorrect key length");

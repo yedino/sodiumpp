@@ -7,9 +7,11 @@ using namespace sodiumpp;
 locked_string::locked_string(std::string &&str) noexcept
 : m_str(std::move(str))
 {
+	assert( str.size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 }
 
 locked_string::locked_string(const std::string &str) {
+		assert( str.size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 		// TODO factor out the common part of all this constructors etc
     m_str.resize(str.size());
     const char * const data_ptr = &m_str[0];
@@ -20,6 +22,7 @@ locked_string::locked_string(const std::string &str) {
 }
 
 locked_string::locked_string(size_t size) {
+		assert( size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 		std::string str(size, 0);
 		assert(str.size() == size);
 		*this = std::move(locked_string(move_from_not_locked_string(std::move(str))));
@@ -29,6 +32,7 @@ locked_string::locked_string(size_t size) {
 
 locked_string::locked_string(const locked_string & str) {
     m_str.resize(str.size());
+		assert( m_str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
 		sodiumpp::mlock(m_str);
@@ -41,6 +45,7 @@ locked_string & locked_string::operator=(const locked_string & str) {
 	sodiumpp::munlock(m_str);
 
 	m_str.resize(str.size());
+	assert( m_str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 	const char * const data_ptr = &m_str[0];
 	assert(m_str.size() == str.size());
 	sodiumpp::mlock(m_str);

@@ -109,6 +109,21 @@ class locked_string final
             /// @}
 
             /// @}
+
+						/**
+						 * Returns pointer to writable(!), and locked(!) memory of current string
+						 * that can be both read and written in region of
+						 * [ p , p + size() )  for p = data_writable()
+						 * In addition, it can be written in longer range:
+						 * [ p , p + size() ]  for p = data_writable()
+						 * Data is NOT guaranteed to be NULL-terminated, if there would be NULL then
+						 * it would be after this range, in position p+size().
+						 * This function is NOT exactly like std::string's c_str() in writable version, nor like data() because
+						 * this functions of std::string act a bit differently (also depending on C++11/14/17 standard)
+						 *
+						 * TODO(rob) compile-time assert that C++ standard is >= C++11 maybe?
+						*/
+            char *buffer_writable() const noexcept;
 };
 
 } // namespace

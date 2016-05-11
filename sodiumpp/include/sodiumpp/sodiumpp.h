@@ -85,6 +85,9 @@ namespace sodiumpp {
     void crypto_onetimeauth_verify(const std::string &a,const std::string &m,const std::string &k);
     std::string crypto_scalarmult_base(const std::string &n);
     std::string crypto_scalarmult(const std::string &n,const std::string &p);
+
+    sodiumpp::locked_string key_agreement_locked(const sodiumpp::locked_string &priv,const std::string &pub);
+
     std::string crypto_secretbox(const std::string &m,const std::string &n,const std::string &k);
     std::string crypto_secretbox_open(const std::string &c,const std::string &n,const std::string &k);
     /**
