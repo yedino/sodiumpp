@@ -6,7 +6,9 @@
 namespace sodiumpp {
 
 /**
+ * @nosubgrouping
  * @brief The locked_string class
+ *
  * Conatin std::string object
  * Internal string data is always locked by sodiumpp::mlock() function
  */
@@ -78,14 +80,9 @@ class locked_string final
             /**
              * @name Secure getters
              * Secure getters, that do not make any copy of the locked memory content.
-             * @{
-            */
-
-            /**
-             * @name basic
-             * std::string const funtions and non-const listed in 21.4.1.5
-             * @{
-             */
+			 * std::string const funtions and non-const listed in 21.4.1.5
+			 * @{
+			 */
             size_t size() const noexcept;
             bool empty() const noexcept;
             char &operator[] (size_t pos);
@@ -99,27 +96,25 @@ class locked_string final
             /// @}
 
             /**
-             * @name entire string
+			 * @name Entire string
              * @note Do not compare this memory direct (i.e. using memcmp())
              * Use safe operators "==" and "!="
              * @{
              */
             const char *c_str() const noexcept;
             const char *data() const noexcept;
-            /// @}
 
-            /// @}
-
-						/**
-						 * Returns pointer to writable, and safe (memlocked) memory of current string,
-						 * that can be both read and written in range:
-						 * inclusive p ..to.. p + size() exclusive, for p = data_writable()
-						 * in addition the character at index [ p+size() ] will contain NULL-character
-						 * and it is not allowed to write to this position (UB).
-						 * Of course you can not change length of this string just by writting data here,
-						 * e.g. any other NULL-character inside this string is just treated as any other character.
-						*/
+			/**
+			* Returns pointer to writable, and safe (memlocked) memory of current string,
+			* that can be both read and written in range:
+			* inclusive p ..to.. p + size() exclusive, for p = data_writable()
+			* in addition the character at index [ p+size() ] will contain NULL-character
+			* and it is not allowed to write to this position (UB).
+			* Of course you can not change length of this string just by writting data here,
+			* e.g. any other NULL-character inside this string is just treated as any other character.
+			*/
             char *buffer_writable() noexcept;
+            /// @}
 };
 
 } // namespace
