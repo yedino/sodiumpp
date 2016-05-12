@@ -21,10 +21,11 @@ class locked_string final
              * only move, not call mlock()
              * for move construction for std::string use static methods:
              * move_from_locked_string() and move_from_not_locked_string
+             * @throw std::invalid_argumet if input string is empty
              */
             explicit locked_string(std::string && str) noexcept; ///< only move, not call mlock()
     public:
-            locked_string() = default;
+            locked_string();
             locked_string(const locked_string &);
             locked_string(locked_string &&) = default;
             locked_string & operator=(const locked_string &);
@@ -39,6 +40,7 @@ class locked_string final
              * @note Of course the current value of string str already was probably leaked,
              * because it was probably existing as a std::string before call to us,
              * therefore rather use constructor from locked_string
+             * @throw std::invalid_argument if input string is empty
              * @param str
              */
             explicit locked_string(const std::string &str);
@@ -46,6 +48,7 @@ class locked_string final
             /**
              * @brief create empty locked string
              * @param size size of internal string
+             * @throw std::invalid_argument if size == 0
              */
             locked_string(size_t size);
 

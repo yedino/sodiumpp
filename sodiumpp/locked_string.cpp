@@ -4,15 +4,21 @@
 
 using namespace sodiumpp;
 
-locked_string::locked_string(std::string &&str) noexcept
-: m_str(std::move(str))
+locked_string::locked_string(std::string &&str) noexcept {
+	if (str.empty()) throw std::invalid_argument("input string is empty");
+	m_str = std::move(str);
+	assert( m_str.size() != 0 );
+}
+
+locked_string::locked_string()
+	: locked_string(1)
 {
-	assert( str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
 }
 
 locked_string::locked_string(const std::string &str) {
-		assert( str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
-		// TODO factor out the common part of all this constructors etc
+	if (str.empty()) throw std::invalid_argument("input string is empty");
+	assert( str.size() != 0 );
+	// TODO factor out the common part of all this constructors etc
     m_str.resize(str.size());
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
@@ -22,15 +28,16 @@ locked_string::locked_string(const std::string &str) {
 }
 
 locked_string::locked_string(size_t size) {
-		assert( size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
-		m_str.resize(size);
-		sodiumpp::mlock(m_str);
+	if (size == 0) throw std::invalid_argument("size == 0");
+	assert( size != 0 );
+	m_str.resize(size);
+	sodiumpp::mlock(m_str);
     assert(m_str.size() == size);
 }
 
 locked_string::locked_string(const locked_string & str) {
-		auto size = str.size();
-		assert( size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+	auto size = str.size();
+	assert( size != 0 ); // size always > 0 because cannot create empty locked_string
     m_str.resize(size);
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
@@ -41,17 +48,16 @@ locked_string::locked_string(const locked_string & str) {
 }
 
 locked_string & locked_string::operator=(const locked_string & str) {
+	if (this == &str) return *this;
 	sodiumpp::memzero(m_str);
 	sodiumpp::munlock(m_str);
-
 	m_str.resize(str.size());
-	assert( m_str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+	assert( m_str.size() != 0 );
 	const char * const data_ptr = &m_str[0];
 	assert(m_str.size() == str.size());
 	sodiumpp::mlock(m_str);
 	m_str = str.get_string();
 	assert(data_ptr == &m_str[0]);
-
 	return *this;
 }
 
