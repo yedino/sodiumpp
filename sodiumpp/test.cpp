@@ -86,6 +86,8 @@ go_bandit([](){
         std::string data;
         before_each([&](){
             data = "abcd";
+            data += char(0);
+            data += "1234";
         });
         it("can move from not locked", [&](){
             const char * const source_data_ptr = &data[0];
@@ -102,7 +104,7 @@ go_bandit([](){
             locked_string ls(data);
             AssertThat(ls.size(), Equals(data.size()));
             AssertThat(sodium_memcmp(ls.data(), data.data(), data.size()), Equals(0));
-            AssertThat(ls.size(), Equals(4));
+            AssertThat(ls.size(), Equals(data.size()));
         });
         it("can compare", [&](){
             locked_string ls1(data);
@@ -126,7 +128,7 @@ go_bandit([](){
               locked_string ls(data);
               const char* const ls_data_ptr = &ls[0];
               locked_string ls2(std::move(ls)); // move constructor
-              AssertThat(ls.size() == 1, Equals(true));
+              AssertThat(ls.size() == 0, Equals(true));
               const char* const ls2_data_ptr = &ls2[0];
               AssertThat(ls_data_ptr == ls2_data_ptr, Equals(true));
               locked_string ls3;

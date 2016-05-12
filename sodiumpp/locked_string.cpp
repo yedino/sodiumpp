@@ -4,20 +4,11 @@
 
 using namespace sodiumpp;
 
-locked_string::locked_string(std::string &&str) noexcept {
-	if (str.empty()) throw std::invalid_argument("input string is empty");
-	m_str = std::move(str);
-	assert( m_str.size() != 0 );
-}
-
-locked_string::locked_string()
-	: locked_string(1)
-{
-}
+locked_string::locked_string(std::string &&str) noexcept
+ : m_str(std::move(str))
+{}
 
 locked_string::locked_string(const std::string &str) {
-	if (str.empty()) throw std::invalid_argument("input string is empty");
-	assert( str.size() != 0 );
 	// TODO factor out the common part of all this constructors etc
     m_str.resize(str.size());
     const char * const data_ptr = &m_str[0];
@@ -28,8 +19,6 @@ locked_string::locked_string(const std::string &str) {
 }
 
 locked_string::locked_string(size_t size) {
-	if (size == 0) throw std::invalid_argument("size == 0");
-	assert( size != 0 );
 	m_str.resize(size);
 	sodiumpp::mlock(m_str);
     assert(m_str.size() == size);
@@ -37,19 +26,12 @@ locked_string::locked_string(size_t size) {
 
 locked_string::locked_string(const locked_string & str) {
 	auto size = str.size();
-	assert( size != 0 ); // size always > 0 because cannot create empty locked_string
     m_str.resize(size);
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
-		sodiumpp::mlock(m_str);
-	for (size_t i=0; i< size; ++i) m_str[i] = str[i];
+	sodiumpp::mlock(m_str);
+	for (size_t i=0; i < size; ++i) m_str[i] = str[i];
 	assert(data_ptr == &m_str[0]);
-}
-
-locked_string::locked_string(locked_string && str)
-	: locked_string()
-{
-	std::swap(this->m_str, str.m_str);
 }
 
 locked_string & locked_string::operator=(const locked_string & str) {
@@ -145,6 +127,7 @@ const char *locked_string::data() const noexcept {
 }
 
 char * locked_string::buffer_writable() noexcept {
+	if (m_str.empty()) throw std::range_error("string is empty");
 	assert( !m_str.empty() ); // UB to access s[0] if empty
 	return &m_str[0] ;
 }
