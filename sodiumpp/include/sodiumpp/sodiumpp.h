@@ -129,6 +129,7 @@ namespace sodiumpp {
     void memzero(std::string& bytes);
     /**
      * Locks the memory used by the string bytes in memory, preventing it from being swapped out.
+     * @throw std::runtime_error if error
      */
     void mlock(std::string& bytes);
     /**

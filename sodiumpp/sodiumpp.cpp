@@ -351,7 +351,8 @@ void sodiumpp::memzero(std::string& bytes) {
 }
 
 void sodiumpp::mlock(std::string& bytes) {
-    sodium_mlock((unsigned char *)&bytes[0], bytes.size());
+    auto ret = sodium_mlock((unsigned char *)&bytes[0], bytes.size());
+    if (ret == -1) throw std::runtime_error("cannot lock memory");
 }
 
 void sodiumpp::munlock(std::string& bytes) {
