@@ -23,10 +23,8 @@ locked_string::locked_string(const std::string &str) {
 
 locked_string::locked_string(size_t size) {
 		assert( size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
-		std::string str(size, 0);
-		assert(str.size() == size);
-		*this = std::move(locked_string(move_from_not_locked_string(std::move(str))));
-		assert(str.size() == 0);
+		m_str.resize(size);
+		sodiumpp::mlock(m_str);
     assert(m_str.size() == size);
 }
 
