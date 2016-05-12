@@ -25,6 +25,8 @@
 #include <sodiumpp/z85.hpp>
 #include <cassert>
 
+namespace sodiumpp {
+
 inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname) {
 	if (current != expected) {
 		throw std::invalid_argument(
@@ -38,6 +40,8 @@ inline void check_valid_size(size_t current, size_t expected, const char * name,
 		);
 	}
 }
+
+} // namespace
 
 std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)
 {
@@ -371,10 +375,6 @@ std::string sodiumpp::randombytes(size_t size) {
     randombytes_buf(&buf[0], size);
     return buf;
 }
-
-#define sodiumpp_dbg(X) do {\
-std::cerr<<"sodiumpp debug " << __FILE__ << ":" << __LINE__ << " (" << __func__ <<") " << X << std::endl;\
-} while(0)
 
 sodiumpp::locked_string sodiumpp::randombytes_locked(size_t size) {
     sodiumpp::locked_string buf_locked(size);
