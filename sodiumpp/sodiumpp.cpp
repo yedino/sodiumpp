@@ -73,17 +73,31 @@ std::string sodiumpp::crypto_box_keypair(locked_string& sk_string)
     return std::string((char *) pk,sizeof pk);
 }
 
+inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname) {
+	if (current != expected) {
+		throw std::invalid_argument(
+			std::string(name)
+			+ std::string(" has invalid size: ")
+			+ std::to_string(current)
+			+ std::string(" bytes, instead of expected size ")
+			+ std::to_string(expected)
+			+ std::string(" bytes, used in function ")
+			+ std::string(funcname)
+		);
+	}
+}
+
 std::string sodiumpp::crypto_box_beforenm(const std::string &pk, const std::string &sk) {
-    if (pk.size() != crypto_box_PUBLICKEYBYTES) throw std::invalid_argument("incorrect public-key length");
-    if (sk.size() != crypto_box_SECRETKEYBYTES) throw std::invalid_argument("incorrect secret-key length");
+		check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
+		check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
     std::string k(crypto_box_BEFORENMBYTES, 0);
     ::crypto_box_beforenm((unsigned char *)&k[0], (const unsigned char *)&pk[0], (const unsigned char *)&sk[0]);
     return k;
 }
 
 std::string sodiumpp::crypto_box_afternm(const std::string &m,const std::string &n,const std::string &k) {
-    if (k.size() != crypto_box_BEFORENMBYTES) throw std::invalid_argument("incorrect nm-key length");
-    if (n.size() != crypto_box_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
+   	check_valid_size( k.size() , crypto_box_BEFORENMBYTES , "incorrect nm-key length" , __func__ );
+    check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
     size_t mlen = m.size() + crypto_box_ZEROBYTES;
     unsigned char mpad[mlen];
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
@@ -101,8 +115,8 @@ std::string sodiumpp::crypto_box_afternm(const std::string &m,const std::string 
 
 std::string sodiumpp::crypto_box_open_afternm(const std::string &c,const std::string &n,const std::string &k)
 {
-    if (k.size() != crypto_box_BEFORENMBYTES) throw std::invalid_argument("incorrect nm-key length");
-    if (n.size() != crypto_box_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
+    check_valid_size( k.size() , crypto_box_BEFORENMBYTES ,  "incorrect nm-key length" , __func__ );
+    check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
     size_t clen = c.size() + crypto_box_BOXZEROBYTES;
     unsigned char cpad[clen];
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;

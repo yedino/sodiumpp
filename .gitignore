@@ -14,3 +14,15 @@
 
 # Vim swap files
 .*.swp
+
+# make process
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# binaries
+tests
+
+
+
