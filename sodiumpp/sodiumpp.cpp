@@ -25,9 +25,23 @@
 #include <sodiumpp/z85.hpp>
 #include <cassert>
 
+inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname) {
+	if (current != expected) {
+		throw std::invalid_argument(
+			std::string(name)
+			+ std::string(" has invalid size: ")
+			+ std::to_string(current)
+			+ std::string(" bytes, instead of expected size ")
+			+ std::to_string(expected)
+			+ std::string(" bytes, used in function ")
+			+ std::string(funcname)
+		);
+	}
+}
+
 std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)
 {
-    if (k.size() != crypto_auth_KEYBYTES) throw std::invalid_argument("incorrect key length");
+	check_valid_size( k.size() , crypto_auth_KEYBYTES , "incorrect key length" , __func__ );
     unsigned char a[crypto_auth_BYTES];
     ::crypto_auth(a,(const unsigned char *) m.c_str(),m.size(),(const unsigned char *) k.c_str());
     return std::string((char *) a,crypto_auth_BYTES);
@@ -35,9 +49,9 @@ std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)
 
 void sodiumpp::crypto_auth_verify(const std::string &a,const std::string &m,const std::string &k)
 {
-    if (k.size() != crypto_auth_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    if (a.size() != crypto_auth_BYTES) throw std::invalid_argument("incorrect authenticator length");
-    if (::crypto_auth_verify(
+	check_valid_size( k.size() , crypto_auth_KEYBYTES , "incorrect key length" , __func__ );
+	check_valid_size( a.size() , crypto_auth_BYTES , "incorrect authenticator length" , __func__ );
+	if (::crypto_auth_verify(
                            (const unsigned char *) a.c_str(),
                            (const unsigned char *) m.c_str(),m.size(),
                            (const unsigned char *) k.c_str()) == 0) return;
@@ -46,10 +60,10 @@ void sodiumpp::crypto_auth_verify(const std::string &a,const std::string &m,cons
 
 std::string sodiumpp::crypto_box(const std::string &m,const std::string &n,const std::string &pk,const std::string &sk)
 {
-    if (pk.size() != crypto_box_PUBLICKEYBYTES) throw std::invalid_argument("incorrect public-key length");
-    if (sk.size() != crypto_box_SECRETKEYBYTES) throw std::invalid_argument("incorrect secret-key length");
-    if (n.size() != crypto_box_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    size_t mlen = m.size() + crypto_box_ZEROBYTES;
+	check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length", __func__ );
+	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length", __func__ );
+	check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length", __func__ );
+	size_t mlen = m.size() + crypto_box_ZEROBYTES;
     unsigned char mpad[mlen];
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_box_ZEROBYTES];
@@ -73,23 +87,9 @@ std::string sodiumpp::crypto_box_keypair(locked_string& sk_string)
     return std::string((char *) pk,sizeof pk);
 }
 
-inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname) {
-	if (current != expected) {
-		throw std::invalid_argument(
-			std::string(name)
-			+ std::string(" has invalid size: ")
-			+ std::to_string(current)
-			+ std::string(" bytes, instead of expected size ")
-			+ std::to_string(expected)
-			+ std::string(" bytes, used in function ")
-			+ std::string(funcname)
-		);
-	}
-}
-
 std::string sodiumpp::crypto_box_beforenm(const std::string &pk, const std::string &sk) {
-		check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
-		check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
+	check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
+	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
     std::string k(crypto_box_BEFORENMBYTES, 0);
     ::crypto_box_beforenm((unsigned char *)&k[0], (const unsigned char *)&pk[0], (const unsigned char *)&sk[0]);
     return k;
@@ -137,10 +137,10 @@ std::string sodiumpp::crypto_box_open_afternm(const std::string &c,const std::st
 
 std::string sodiumpp::crypto_box_open(const std::string &c,const std::string &n,const std::string &pk,const std::string &sk)
 {
-    if (pk.size() != crypto_box_PUBLICKEYBYTES) throw std::invalid_argument("incorrect public-key length");
-    if (sk.size() != crypto_box_SECRETKEYBYTES) throw std::invalid_argument("incorrect secret-key length");
-    if (n.size() != crypto_box_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    size_t clen = c.size() + crypto_box_BOXZEROBYTES;
+	check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
+	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
+	check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
+	size_t clen = c.size() + crypto_box_BOXZEROBYTES;
     unsigned char cpad[clen];
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;
     for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_box_BOXZEROBYTES];
@@ -168,17 +168,17 @@ std::string sodiumpp::crypto_hash(const std::string &m)
 
 std::string sodiumpp::crypto_onetimeauth(const std::string &m,const std::string &k)
 {
-    if (k.size() != crypto_onetimeauth_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    unsigned char a[crypto_onetimeauth_BYTES];
+	check_valid_size( k.size() , crypto_onetimeauth_KEYBYTES , "incorrect key length" , __func__ );
+	unsigned char a[crypto_onetimeauth_BYTES];
     ::crypto_onetimeauth(a,(const unsigned char *) m.c_str(),m.size(),(const unsigned char *) k.c_str());
     return std::string((char *) a,crypto_onetimeauth_BYTES);
 }
 
 void sodiumpp::crypto_onetimeauth_verify(const std::string &a,const std::string &m,const std::string &k)
 {
-    if (k.size() != crypto_onetimeauth_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    if (a.size() != crypto_onetimeauth_BYTES) throw std::invalid_argument("incorrect authenticator length");
-    if (::crypto_onetimeauth_verify(
+	check_valid_size( k.size() , crypto_onetimeauth_KEYBYTES , "incorrect key length" , __func__ );
+	check_valid_size( a.size() , crypto_onetimeauth_BYTES , "incorrect authenticator length" , __func__ );
+	if (::crypto_onetimeauth_verify(
                                   (const unsigned char *) a.c_str(),
                                   (const unsigned char *) m.c_str(),m.size(),
                                   (const unsigned char *) k.c_str()) == 0) return;
@@ -188,16 +188,16 @@ void sodiumpp::crypto_onetimeauth_verify(const std::string &a,const std::string 
 std::string sodiumpp::crypto_scalarmult_base(const std::string &n)
 {
     unsigned char q[crypto_scalarmult_BYTES];
-    if (n.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
-    ::crypto_scalarmult_base(q,(const unsigned char *) n.c_str());
+	check_valid_size( n.size() , crypto_scalarmult_SCALARBYTES , "incorrect scalar length" , __func__ );
+	::crypto_scalarmult_base(q,(const unsigned char *) n.c_str());
     return std::string((char *) q,sizeof q);
 }
 
 std::string sodiumpp::generate_pubkey_from_privkey(const sodiumpp::locked_string &n)
 {
     unsigned char q[crypto_scalarmult_BYTES];
-    if (n.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
-    ::crypto_scalarmult_base(q,(const unsigned char *) n.c_str());
+	check_valid_size( n.size() , crypto_scalarmult_SCALARBYTES , "incorrect scalar length" , __func__ );
+	::crypto_scalarmult_base(q,(const unsigned char *) n.c_str());
     return std::string((char *) q,sizeof q);
 }
 
@@ -205,16 +205,16 @@ std::string sodiumpp::generate_pubkey_from_privkey(const sodiumpp::locked_string
 std::string sodiumpp::crypto_scalarmult(const std::string &n,const std::string &p)
 {
     unsigned char q[crypto_scalarmult_BYTES];
-    if (n.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
-    if (p.size() != crypto_scalarmult_BYTES) throw std::invalid_argument("incorrect element length");
-    ::crypto_scalarmult(q,(const unsigned char *) n.c_str(),(const unsigned char *) p.c_str());
+	check_valid_size( n.size() , crypto_scalarmult_SCALARBYTES , "incorrect scalar length" , __func__ );
+	check_valid_size( p.size() , crypto_scalarmult_BYTES , "incorrect element length" , __func__ );
+	::crypto_scalarmult(q,(const unsigned char *) n.c_str(),(const unsigned char *) p.c_str());
     return std::string((char *) q,sizeof q);
 }
 
 sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_string &priv,const std::string &pub) {
-    if (priv.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
-    if (pub.size() != crypto_scalarmult_BYTES) throw std::invalid_argument("incorrect element length");
-    locked_string q(crypto_scalarmult_BYTES); // allocate locked memory
+	check_valid_size( priv.size() , crypto_scalarmult_SCALARBYTES , "incorrect scalar length", __func__ );
+	check_valid_size( pub.size() , crypto_scalarmult_BYTES , "incorrect element length", __func__ );
+	locked_string q(crypto_scalarmult_BYTES); // allocate locked memory
 
 		assert( q.size() == crypto_scalarmult_BYTES ); // because that many bytes will be written by function:
     ::crypto_scalarmult(
@@ -226,9 +226,9 @@ sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_st
 
 std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n,const std::string &k)
 {
-    if (k.size() != crypto_secretbox_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    if (n.size() != crypto_secretbox_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    size_t mlen = m.size() + crypto_secretbox_ZEROBYTES;
+	check_valid_size( k.size() , crypto_secretbox_KEYBYTES , "incorrect key length" , __func__ );
+	check_valid_size( n.size() , crypto_secretbox_NONCEBYTES , "incorrect nonce length" , __func__ );
+	size_t mlen = m.size() + crypto_secretbox_ZEROBYTES;
     unsigned char mpad[mlen];
     for (size_t i = 0;i < crypto_secretbox_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_secretbox_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_secretbox_ZEROBYTES];
@@ -242,9 +242,9 @@ std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n
 
 std::string sodiumpp::crypto_secretbox_open(const std::string &c,const std::string &n,const std::string &k)
 {
-    if (k.size() != crypto_secretbox_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    if (n.size() != crypto_secretbox_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    size_t clen = c.size() + crypto_secretbox_BOXZEROBYTES;
+	check_valid_size( k.size() , crypto_secretbox_KEYBYTES , "incorrect key length" , __func__ );
+	check_valid_size( n.size() , crypto_secretbox_NONCEBYTES , "incorrect nonce length" , __func__ );
+	size_t clen = c.size() + crypto_secretbox_BOXZEROBYTES;
     unsigned char cpad[clen];
     for (size_t i = 0;i < crypto_secretbox_BOXZEROBYTES;++i) cpad[i] = 0;
     for (size_t i = crypto_secretbox_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_secretbox_BOXZEROBYTES];
@@ -269,8 +269,8 @@ std::string sodiumpp::crypto_sign_keypair(locked_string &sk_string)
 
 std::string sodiumpp::crypto_sign_open(const std::string &sm_string, const std::string &pk_string)
 {
-    if (pk_string.size() != crypto_sign_PUBLICKEYBYTES) throw std::invalid_argument("incorrect public-key length");
-    size_t smlen = sm_string.size();
+	check_valid_size( pk_string.size() , crypto_sign_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
+	size_t smlen = sm_string.size();
     unsigned char m[smlen];
     unsigned long long mlen;
     for (size_t i = 0;i < smlen;++i) m[i] = sm_string[i];
@@ -290,8 +290,8 @@ std::string sodiumpp::crypto_sign_open(const std::string &sm_string, const std::
 
 std::string sodiumpp::crypto_sign(const std::string &m_string, const std::string &sk_string)
 {
-    if (sk_string.size() != crypto_sign_SECRETKEYBYTES) throw std::invalid_argument("incorrect secret-key length");
-    size_t mlen = m_string.size();
+	check_valid_size( sk_string.size() , crypto_sign_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
+	size_t mlen = m_string.size();
     unsigned char m[mlen+crypto_sign_BYTES];
     unsigned long long smlen;
     for (size_t i = 0;i < mlen;++i) m[i] = m_string[i];
@@ -310,18 +310,18 @@ std::string sodiumpp::crypto_sign(const std::string &m_string, const std::string
 
 std::string sodiumpp::crypto_stream(size_t clen,const std::string &n,const std::string &k)
 {
-    if (n.size() != crypto_stream_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    if (k.size() != crypto_stream_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    unsigned char c[clen];
+	check_valid_size( n.size() , crypto_stream_NONCEBYTES , "incorrect nonce length" , __func__ );
+	check_valid_size( k.size() , crypto_stream_KEYBYTES , "incorrect key length" , __func__ );
+	unsigned char c[clen];
     ::crypto_stream(c,clen,(const unsigned char *) n.c_str(),(const unsigned char *) k.c_str());
     return std::string((char *) c,clen);
 }
 
 std::string sodiumpp::crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k)
 {
-    if (n.size() != crypto_stream_NONCEBYTES) throw std::invalid_argument("incorrect nonce length");
-    if (k.size() != crypto_stream_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    size_t mlen = m.size();
+	check_valid_size( n.size() , crypto_stream_NONCEBYTES , "incorrect nonce length" , __func__ );
+	check_valid_size( k.size() , crypto_stream_KEYBYTES , "incorrect key length" , __func__ );
+	size_t mlen = m.size();
     unsigned char c[mlen];
     ::crypto_stream_xor(c,
                       (const unsigned char *) m.c_str(),mlen,
@@ -338,12 +338,12 @@ std::string sodiumpp::bin2hex(const std::string& bytes) {
 }
 
 std::string sodiumpp::hex2bin(const std::string& bytes) {
-    if(bytes.size() % 2 != 0) throw std::invalid_argument("length must be even");
-    std::string bin(bytes.size()/2, 0);
+	check_valid_size( bytes.size() % 2 , 0 , "length must be even" , __func__ );
+	std::string bin(bytes.size()/2, 0);
     size_t binlen;
     sodium_hex2bin((unsigned char *)&bin[0], bin.size(), &bytes[0], bytes.size(), nullptr, &binlen, nullptr);
-    if(binlen != bin.size()) throw std::invalid_argument("string must be all hexadecimal digits");
-    return bin;
+	check_valid_size( binlen , bin.size() , "string must be all hexadecimal digits" , __func__ );
+	return bin;
 }
 
 void sodiumpp::memzero(std::string& bytes) {
@@ -360,8 +360,8 @@ void sodiumpp::munlock(std::string& bytes) {
 }
 
 std::string sodiumpp::crypto_shorthash(const std::string& m, const std::string& k) {
-    if(k.size() != crypto_shorthash_KEYBYTES) throw std::invalid_argument("incorrect key length");
-    std::string out(crypto_shorthash_BYTES, 0);
+	check_valid_size( k.size() , crypto_shorthash_KEYBYTES , "incorrect key length" , __func__ );
+	std::string out(crypto_shorthash_BYTES, 0);
     ::crypto_shorthash((unsigned char *)&out[0], (const unsigned char *)&m[0], m.size(), (const unsigned char *)&k[0]);
     return out;
 }
