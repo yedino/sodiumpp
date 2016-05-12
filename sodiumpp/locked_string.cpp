@@ -29,12 +29,14 @@ locked_string::locked_string(size_t size) {
 }
 
 locked_string::locked_string(const locked_string & str) {
-    m_str.resize(str.size());
-		assert( m_str.size() != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+		auto size = str.size();
+		assert( size != 0 ); // code is not yet checked agains this corner case vs UB. TODO(rob)
+    m_str.resize(size);
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
 		sodiumpp::mlock(m_str);
-		m_str = str.get_string();
+		// m_str = str.get_string();
+		for (size_t i=0; i<size; ++i) m_str[i] = str[i];
     assert(data_ptr == &m_str[0]);
 }
 
