@@ -193,6 +193,15 @@ std::string sodiumpp::crypto_scalarmult_base(const std::string &n)
     return std::string((char *) q,sizeof q);
 }
 
+std::string sodiumpp::generate_pubkey_from_privkey(const sodiumpp::locked_string &n)
+{
+    unsigned char q[crypto_scalarmult_BYTES];
+    if (n.size() != crypto_scalarmult_SCALARBYTES) throw std::invalid_argument("incorrect scalar length");
+    ::crypto_scalarmult_base(q,(const unsigned char *) n.c_str());
+    return std::string((char *) q,sizeof q);
+}
+
+
 std::string sodiumpp::crypto_scalarmult(const std::string &n,const std::string &p)
 {
     unsigned char q[crypto_scalarmult_BYTES];
@@ -362,10 +371,15 @@ std::string sodiumpp::randombytes(size_t size) {
     return buf;
 }
 
+#define sodiumpp_dbg(X) do {\
+std::cerr<<"sodiumpp debug " << __FILE__ << ":" << __LINE__ << " (" << __func__ <<") " << X << std::endl;\
+} while(0)
+
 sodiumpp::locked_string sodiumpp::randombytes_locked(size_t size) {
     sodiumpp::locked_string buf_locked(size);
     assert( buf_locked.size() == size );
     randombytes_buf( static_cast<void*>( & buf_locked.front() ) , size);
+    sodiumpp_dbg( "For size="<<size<<" created string length: " << buf_locked.size() );
     return buf_locked;
 }
 

@@ -86,6 +86,16 @@ namespace sodiumpp {
     std::string crypto_scalarmult_base(const std::string &n);
     std::string crypto_scalarmult(const std::string &n,const std::string &p);
 
+		/** This is like crypto_scalarmult_base() but works on locked string.
+		 * in parameters: MEMLOKED strings
+		 * @return The result is not-memlocked string because it is assumed to be public key.
+		 */
+		std::string generate_pubkey_from_privkey(const sodiumpp::locked_string &n);
+
+		/** This is like crypto_scalarmult() but works on locked string.
+		 * in parameters: MEMLOCKED strings
+		 * @return: MEMLOCKED string, assumed to be the resulting shared secret key
+		 */
     sodiumpp::locked_string key_agreement_locked(const sodiumpp::locked_string &priv,const std::string &pub);
 
     std::string crypto_secretbox(const std::string &m,const std::string &n,const std::string &k);
