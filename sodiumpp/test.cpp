@@ -113,6 +113,27 @@ go_bandit([](){
             AssertThat(ls1==ls2, Equals(false));
             AssertThat(ls1!=ls2, Equals(true));
         });
+        it("can copy", [&](){
+            locked_string ls(data);
+            locked_string ls2(ls);
+            locked_string ls3;
+            ls3 = ls2;
+            ls = ls;
+            AssertThat(ls == ls2, Equals(true));
+            AssertThat(ls2 == ls3, Equals(true));
+        });
+        it("can move", [&](){
+              locked_string ls(data);
+              const char* const ls_data_ptr = &ls[0];
+              locked_string ls2(std::move(ls)); // move constructor
+              AssertThat(ls.size() == 1, Equals(true));
+              const char* const ls2_data_ptr = &ls2[0];
+              AssertThat(ls_data_ptr == ls2_data_ptr, Equals(true));
+              locked_string ls3;
+              ls3 = std::move(ls2); // move assigment
+              const char* const ls3_data_ptr = &ls3[0];
+              AssertThat(ls2_data_ptr == ls3_data_ptr, Equals(true));
+        });
     });
 });
 

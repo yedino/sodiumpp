@@ -27,7 +27,7 @@ class locked_string final
     public:
             locked_string();
             locked_string(const locked_string &);
-            locked_string(locked_string &&) = default;
+            locked_string(locked_string &&str);
             locked_string & operator=(const locked_string &);
             locked_string & operator=(locked_string &&) = default;
 

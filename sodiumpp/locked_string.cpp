@@ -42,9 +42,14 @@ locked_string::locked_string(const locked_string & str) {
     const char * const data_ptr = &m_str[0];
     assert(m_str.size() == str.size());
 		sodiumpp::mlock(m_str);
-		// m_str = str.get_string();
-		for (size_t i=0; i<size; ++i) m_str[i] = str[i];
-    assert(data_ptr == &m_str[0]);
+	for (size_t i=0; i< size; ++i) m_str[i] = str[i];
+	assert(data_ptr == &m_str[0]);
+}
+
+locked_string::locked_string(locked_string && str)
+	: locked_string()
+{
+	std::swap(this->m_str, str.m_str);
 }
 
 locked_string & locked_string::operator=(const locked_string & str) {
@@ -56,7 +61,7 @@ locked_string & locked_string::operator=(const locked_string & str) {
 	const char * const data_ptr = &m_str[0];
 	assert(m_str.size() == str.size());
 	sodiumpp::mlock(m_str);
-	m_str = str.get_string();
+	for (size_t i=0; i< m_str.size(); ++i) m_str[i] = str[i];
 	assert(data_ptr == &m_str[0]);
 	return *this;
 }
