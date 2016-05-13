@@ -547,7 +547,8 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
         /**
          * Construct from the receiver's public key pk and the sender's secret key sk
          */
-        boxer(const box_public_key& pk, const box_secret_key& sk) : boxer(pk, sk, encoded_bytes("", encoding::binary)) {}
+        // TODO:
+        // boxer(const box_public_key& pk, const box_secret_key& sk) : boxer(pk, sk, encoded_bytes("", encoding::binary)) {}
 
         boxer(boxer_type_shared_key,
         	bool use_nonce_even,
@@ -629,9 +630,16 @@ The random version that generates random nonce itself: TODO?
         /**
          * Construct from the sender's public key pk, the receiver's secret key sk and an encoded constant part for the nonces.
          */
-        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant) : boxer_base(crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())), n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary()) 
+        // TODO:
+        /*
+        unboxer(const box_public_key& pk, const box_secret_key& sk, const encoded_bytes& nonce_constant)
+        :
+        boxer_base(
+        	crypto_box_beforenm(pk.get().to_binary(), sk.get().to_binary())),
+        	n(nonce_constant, pk.get().to_binary() > sk.pk.get().to_binary())
         {
         }
+*/
 
         unboxer(boxer_type_shared_key,
         	bool use_nonce_even,
