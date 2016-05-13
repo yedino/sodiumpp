@@ -27,20 +27,6 @@
 
 namespace sodiumpp {
 
-inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname) {
-	if (current != expected) {
-		throw std::invalid_argument(
-			std::string(name)
-			+ std::string(" has invalid size: ")
-			+ std::to_string(current)
-			+ std::string(" bytes, instead of expected size ")
-			+ std::to_string(expected)
-			+ std::string(" bytes, used in function ")
-			+ std::string(funcname)
-		);
-	}
-}
-
 } // namespace
 
 std::string sodiumpp::crypto_auth(const std::string &m,const std::string &k)

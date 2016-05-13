@@ -52,7 +52,20 @@ extern "C" {
 namespace sodiumpp {
 
 // for testing against errors:
-inline void check_valid_size(size_t current, size_t expected, const char * name, const char * funcname);
+template<typename T1, typename T2>
+inline void check_valid_size(T1 current, T2 expected, const char * name, const char * funcname) {
+	if (current != expected) {
+		throw std::invalid_argument(
+			std::string(name)
+			+ std::string(" has invalid size: ")
+			+ std::to_string(current)
+			+ std::string(" bytes, instead of expected size ")
+			+ std::to_string(expected)
+			+ std::string(" bytes, used in function ")
+			+ std::string(funcname)
+		);
+	}
+}
 
     std::string crypto_auth(const std::string &m,const std::string &k);
     void crypto_auth_verify(const std::string &a,const std::string &m,const std::string &k);
@@ -545,7 +558,7 @@ inline void check_valid_size(size_t current, size_t expected, const char * name,
         boxer_base(secret_shared_key),
         n( nonce_constant , use_nonce_even )
         {
-					check_valid_size( k.size() , 32 , "incorrect key length" , __func__ );
+					check_valid_size( k.size() , 32U , "incorrect key length" , __func__ );
       	}
 
 /*
@@ -629,7 +642,7 @@ The random version that generates random nonce itself: TODO?
         boxer_base(secret_shared_key),
         n( nonce_constant , use_nonce_even )
         {
-					check_valid_size( k.size() , 32 , "incorrect key length" , __func__ );
+					check_valid_size( k.size() , 32U , "incorrect key length" , __func__ );
 				}
 
         /**
