@@ -163,11 +163,11 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
      * Locks the memory used by the string bytes in memory, preventing it from being swapped out.
      * @throw std::runtime_error if error
      */
-    void mlock(std::string& bytes);
+    void mlock(const std::string& bytes);
     /**
      * Unlocks the memory used by the string bytes, allowing it to be swapped out again.
      */
-    void munlock(std::string& bytes);
+    void munlock(const std::string& bytes);
     
     /**
      * Exception class for cryptographic errors: failed verifications etc.
