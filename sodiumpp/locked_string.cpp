@@ -132,3 +132,7 @@ char * locked_string::buffer_writable() noexcept {
 	return &m_str[0] ;
 }
 
+size_t locked_string::copy(char *s, size_t len, size_t pos) const {
+	m_str.copy(s, len, pos);
+}
+

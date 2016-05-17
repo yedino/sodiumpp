@@ -115,6 +115,7 @@ class locked_string final
 			*/
             char *buffer_writable() noexcept;
             /// @}
+            size_t copy (char* s, size_t len, size_t pos = 0) const;
 };
 
 } // namespace
