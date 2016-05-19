@@ -37,7 +37,7 @@ extern "C" {
 
 
 #ifndef SODIUMPP_OPTION_DEBUG
-	#define SODIUMPP_OPTION_DEBUG 1
+	#define SODIUMPP_OPTION_DEBUG 0
 #endif
 
 #if SODIUMPP_OPTION_DEBUG
