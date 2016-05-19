@@ -48,7 +48,7 @@ locked_string & locked_string::operator=(const locked_string & str) {
 	return *this;
 }
 
-locked_string locked_string::unsafe_create(const std::__cxx11::string &str) {
+locked_string locked_string::unsafe_create(const std::string &str) {
 	std::string to_unsafe_move(str);
 	return move_from_not_locked_string(std::move(to_unsafe_move));
 }
