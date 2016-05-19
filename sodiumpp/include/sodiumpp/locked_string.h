@@ -30,6 +30,17 @@ class locked_string final
             locked_string & operator=(const locked_string &);
             locked_string & operator=(locked_string &&) = default;
 
+			/**
+			 * @brief unsafe_create Creating locked string from obviously unsafe source.
+			 * 						This is only for tests of course (as the memory is not-locked
+			 * 						already before calling us
+			 * @return locked_string UNSAFE!
+			 * @{
+			 */
+			static locked_string unsafe_create(const std::string &str);
+			static locked_string unsafe_create(const char *c_str);
+			///@}
+
             // TODO: prove with standard c++11, that default move constructor of std::string
             // will preserve the address of memory of it's data - address of & .at(0)
             // or else write own secure versions of move constructors
@@ -51,7 +62,8 @@ class locked_string final
 
             /**
              * @brief move_from_locked_string
-             * @param str - the data, it will be "destroyed" (moved from, so caller should not use it later). It MUST BE already mlocked() by caler.
+			 * @param str - The data, it will be "destroyed" (moved from, so caller should not use it later).
+			 * 				It MUST BE already mlocked() by caler.
              * @return locked_string object
              */
             static locked_string move_from_locked_string(std::string &&str);
@@ -115,7 +127,7 @@ class locked_string final
 			*/
             char *buffer_writable() noexcept;
             /// @}
-            size_t copy (char* s, size_t len, size_t pos = 0) const;
+			size_t copy (char* s, size_t len, size_t pos = 0) const;
 };
 
 } // namespace
