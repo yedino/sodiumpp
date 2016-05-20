@@ -106,7 +106,9 @@ class locked_string final
             char &front();
             const char &front() const;
             std::string::iterator begin() noexcept;
+            std::string::const_iterator begin() const noexcept;
             std::string::iterator end() noexcept;
+            std::string::const_iterator end() const noexcept;
             /// @}
 
             /**

@@ -131,7 +131,15 @@ std::string::iterator locked_string::begin() noexcept {
 	return m_str.begin();
 }
 
+std::string::const_iterator locked_string::begin() const noexcept {
+	return m_str.begin();
+}
+
 std::string::iterator locked_string::end() noexcept {
+	return m_str.end();
+}
+
+std::string::const_iterator locked_string::end() const noexcept {
 	return m_str.end();
 }
 
