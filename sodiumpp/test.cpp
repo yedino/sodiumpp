@@ -137,6 +137,42 @@ go_bandit([](){
               AssertThat(ls2_data_ptr == ls3_data_ptr, Equals(true));
         });
     });
+
+	describe("crypto_sign_detached", [](){
+		std::cout << "\ncrypto sign test start " << std::endl;
+		it("sign", [&](){
+			std::cout << "\nsign test start " << std::endl;
+			std::string msg;
+			locked_string secretkey(crypto_sign_SECRETKEYBYTES);
+			std::string pubkey = crypto_sign_keypair(secretkey);
+
+			std::string signature;
+			signature = crypto_sign_detached(msg, secretkey.get_string());
+			std::cout << "\nsignature: " << signature
+					  << " sig size: " << signature.size()
+					  << " expected: " << crypto_sign_BYTES << std::endl;
+			AssertThat(signature.size() == crypto_sign_BYTES, Equals(true));
+
+		});
+		it("sign_and_verify", [&](){
+			std::cout << "\nsign and verify test start " << std::endl;
+
+//			for(size_t i = 0; i < 10; ++i) {
+//				std::string msg;
+//				msg = "00beforerand";
+//				msg += randombytes(static_cast<size_t>(rand()));
+//				msg += "endrandombytes";
+
+//				locked_string secretkey(crypto_sign_SECRETKEYBYTES);
+//				std::string pubkey = crypto_sign_keypair(secretkey);
+
+//				std::string signature;
+//				signature = crypto_sign_detached(msg, secretkey.get_string());
+
+//				crypto_sign_verify_detached(signature,msg, pubkey);
+//			}
+		});
+	});
 });
 
 int main(int argc, char ** argv) {

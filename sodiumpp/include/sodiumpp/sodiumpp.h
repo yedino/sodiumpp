@@ -143,8 +143,23 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
 	/**
 	 * @brief crypto sign datached
 	 */
-	std::string crypto_sign_detached(const std::string &sig_string, const std::string &msg_string, const std::string &sk_string);
-	std::string crypto_sign_verify_detached(const std::string &sig_string, const std::string &m_string, const std::string &pk_string);
+	/**
+	 * @brief crypto_sign_detached
+	 * @param m_string message
+	 * @param sk_string secret key
+	 * @return signature
+	 */
+	std::string crypto_sign_detached(const std::string &m_string, const std::string &sk_string);
+	/**
+	 * @brief crypto_sign_verify_detached
+	 * 		  if verification fail throw sodiumpp error
+	 * @param s_string signature
+	 * @param m_string message
+	 * @param pk_string	public key
+	 */
+	void crypto_sign_verify_detached(const std::string &s_string,
+									 const std::string &m_string,
+									 const std::string &pk_string);
 
 	std::string crypto_stream(size_t clen,const std::string &n,const std::string &k);
     std::string crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k);
