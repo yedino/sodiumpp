@@ -124,7 +124,15 @@ char &locked_string::front() {
 }
 
 const char &locked_string::front() const {
-    return m_str.front();
+	return m_str.front();
+}
+
+std::string::iterator locked_string::begin() noexcept {
+	return m_str.begin();
+}
+
+std::string::iterator locked_string::end() noexcept {
+	return m_str.end();
 }
 
 const char *locked_string::c_str() const noexcept {
