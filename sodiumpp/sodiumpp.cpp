@@ -297,6 +297,13 @@ std::string sodiumpp::crypto_sign(const std::string &m_string, const std::string
                   smlen
                   );
 }
+std::string sodiumpp::crypto_sign_detached(const std::string &sig_string, const std::string &msg_string, const std::string &sk_string) {
+	return "";
+}
+
+std::string sodiumpp::crypto_sign_verify_detached(const std::string &sig_string, const std::string &m_string, const std::string &pk_string) {
+	return "";
+}
 
 std::string sodiumpp::crypto_stream(size_t clen,const std::string &n,const std::string &k)
 {

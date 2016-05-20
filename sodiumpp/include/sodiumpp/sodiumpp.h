@@ -140,7 +140,13 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
     std::string crypto_sign_keypair(locked_string &sk_string);
     std::string crypto_sign_open(const std::string &sm_string, const std::string &pk_string);
     std::string crypto_sign(const std::string &m_string, const std::string &sk_string);
-    std::string crypto_stream(size_t clen,const std::string &n,const std::string &k);
+	/**
+	 * @brief crypto sign datached
+	 */
+	std::string crypto_sign_detached(const std::string &sig_string, const std::string &msg_string, const std::string &sk_string);
+	std::string crypto_sign_verify_detached(const std::string &sig_string, const std::string &m_string, const std::string &pk_string);
+
+	std::string crypto_stream(size_t clen,const std::string &n,const std::string &k);
     std::string crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k);
     std::string crypto_shorthash(const std::string& m, const std::string& k);
     std::string randombytes(size_t size);
