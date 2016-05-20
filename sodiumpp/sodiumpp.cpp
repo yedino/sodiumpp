@@ -301,8 +301,7 @@ std::string sodiumpp::crypto_sign_detached(const std::string &m_string, const st
 {
 	check_valid_size( sk_string.size() , crypto_sign_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
 
-	unsigned char sig[crypto_sign_BYTES+1];
-	sig[crypto_sign_BYTES] = '\0';
+	unsigned char sig[crypto_sign_BYTES];
 
 	::crypto_sign_detached(sig,
 						   NULL,
@@ -310,7 +309,7 @@ std::string sodiumpp::crypto_sign_detached(const std::string &m_string, const st
 						   m_string.size(),
 						   reinterpret_cast<const unsigned char *>(sk_string.c_str()));
 
-	return std::string(reinterpret_cast<const char *>(sig));
+	return std::string(reinterpret_cast<const char *>(sig), crypto_sign_BYTES);
 }
 
 void sodiumpp::crypto_sign_verify_detached(const std::string &s_string,
@@ -320,10 +319,7 @@ void sodiumpp::crypto_sign_verify_detached(const std::string &s_string,
 	check_valid_size( s_string.size() , crypto_sign_BYTES , "incorrect sign length" , __func__ );
 	check_valid_size( pk_string.size() , crypto_sign_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
 
-	unsigned char sig[crypto_sign_BYTES];
-	for (size_t i = 0;i < s_string.size();++i) sig[i] = static_cast<unsigned char>(m_string.at(i));
-
-	if (::crypto_sign_verify_detached(sig,
+	if (::crypto_sign_verify_detached(reinterpret_cast<const unsigned char *>(s_string.c_str()),
 									  reinterpret_cast<const unsigned char *>(m_string.c_str()),
 									  m_string.size(),
 									  reinterpret_cast<const unsigned char *>(pk_string.c_str())) != 0) {

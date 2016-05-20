@@ -157,20 +157,27 @@ go_bandit([](){
 		it("sign_and_verify", [&](){
 			std::cout << "\nsign and verify test start " << std::endl;
 
-//			for(size_t i = 0; i < 10; ++i) {
-//				std::string msg;
-//				msg = "00beforerand";
-//				msg += randombytes(static_cast<size_t>(rand()));
-//				msg += "endrandombytes";
+			for(size_t i = 0; i < 100; ++i) {
+				std::string msg = "00beforerand";
+				msg += randombytes(static_cast<size_t>(rand()%20));
+				msg += "endrandombytes";
 
-//				locked_string secretkey(crypto_sign_SECRETKEYBYTES);
-//				std::string pubkey = crypto_sign_keypair(secretkey);
+				locked_string secretkey(crypto_sign_SECRETKEYBYTES);
+				std::string pubkey = crypto_sign_keypair(secretkey);
 
-//				std::string signature;
-//				signature = crypto_sign_detached(msg, secretkey.get_string());
+				std::string signature;
+				signature = crypto_sign_detached(msg, secretkey.get_string());
 
-//				crypto_sign_verify_detached(signature,msg, pubkey);
-//			}
+				try {
+				crypto_sign_verify_detached(signature,msg, pubkey);
+				} catch (sodiumpp::crypto_error &err) {
+					std::cout << err.what() << std::endl;
+				} catch (std::exception &err) {
+					std::cout << err.what() << std::endl;
+				} catch (...) {
+					std::cout << "FAIL: unexpected" << std::endl;
+				}
+			}
 		});
 	});
 });
