@@ -77,13 +77,13 @@ const std::string &locked_string::get_string() const {
     return m_str;
 }
 
-bool locked_string::operator==(const locked_string &rhs) {
+bool locked_string::operator==(const locked_string &rhs) const {
     if (m_str.size() != rhs.m_str.size()) return false;
     if (sodium_memcmp(m_str.data(), rhs.m_str.data(), m_str.size()) == 0) return true;
     else return false;
 }
 
-bool locked_string::operator!=(const locked_string &rhs) {
+bool locked_string::operator!=(const locked_string &rhs) const {
     return !(*this == rhs);
 }
 

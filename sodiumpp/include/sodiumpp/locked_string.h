@@ -86,8 +86,8 @@ class locked_string final
              * Comparison operators
              * sodium_memcmp() function is used inside
              */
-            bool operator==(const locked_string &rhs);
-            bool operator!=(const locked_string &rhs);
+            bool operator==(const locked_string &rhs) const;
+            bool operator!=(const locked_string &rhs) const;
 
             /**
              * @name Secure getters
