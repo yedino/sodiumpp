@@ -527,6 +527,8 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
 
     	struct boxer_type_shared_key{}; // just a tag, to "name" the constructor
 
+			const sodiumpp::locked_string & get_secret_PRIVATE_key() const ; ///< should be used e.g. for debg
+
    	protected:
    		~boxer_base()=default; // to forbid using pointers to this not-virtual base class.
 		};

@@ -421,3 +421,13 @@ std::string sodiumpp::decode_to_binary(const std::string& encoded_bytes, sodiump
             return z85::decode_with_padding(encoded_bytes);
     }
 }
+
+namespace sodiumpp {
+
+const sodiumpp::locked_string & boxer_base::get_secret_PRIVATE_key() const {
+	return this->k;
+}
+
+} // namespace sodiumpp
+
+
