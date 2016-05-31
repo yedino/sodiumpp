@@ -24,6 +24,14 @@ locked_string::locked_string(size_t size) {
     assert(m_str.size() == size);
 }
 
+locked_string::locked_string(size_t size, char ch) {
+	m_str.resize(size);
+	sodiumpp::mlock(m_str);
+	assert(m_str.size() == size);
+
+	std::fill(m_str.begin(), m_str.end(), ch);
+}
+
 locked_string::locked_string(const locked_string & str) {
 	auto size = str.size();
     m_str.resize(size);

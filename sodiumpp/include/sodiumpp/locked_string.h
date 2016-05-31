@@ -58,7 +58,13 @@ class locked_string final
              * @brief create empty locked string
              * @param size size of internal string
              */
-            locked_string(size_t size);
+			locked_string(size_t size);
+			/**
+			 * @brief create empty locked string and fill it with char ch
+			 * @param size size of internal string
+			 * @param ch char to fill with
+			 */
+			locked_string(size_t size, char ch);
 
             /**
              * @brief move_from_locked_string
