@@ -28,6 +28,8 @@
 #include <string>
 #include <stdexcept>
 
+#include <sstream>
+
 extern "C" {
 #include <sodium.h>
 }
@@ -42,7 +44,7 @@ extern "C" {
 
 #if SODIUMPP_OPTION_DEBUG
 	#define sodiumpp_dbg(X) do {\
-	std::cerr<<"###sodiumpp debug### " << __FILE__ << ":" << __LINE__ << " (" << __func__ <<") " << X << std::endl;\
+	std::cerr<<"------------------------- ###sodiumpp debug### " << __FILE__ << ":" << __LINE__ << " (" << __func__ <<") " << X << std::endl;\
 	} while(0)
 #else
 	#define sodiumpp_dbg(X) do {}while(0)
@@ -422,10 +424,18 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
                 throw std::invalid_argument("constant bytes does not have correct length");
             }
 
+						if (constant_decoded.size() > bytes.size()) {
+							using namespace std;
+							std::ostringstream oss;
+							oss<<"Too large data: constant_decoded.size="<<constant_decoded.size()
+								<<" from constant.size="<<constant.bytes.size()
+								<<" can not fit into bytes with size="<<bytes.size();
+							throw std::runtime_error(oss.str());
+						}
             std::copy(constant_decoded.begin(), constant_decoded.end(), &bytes[0]);
 
             if(uneven) {
-                bytes[bytes.size()-1] = 1;
+                bytes.at(bytes.size()-1) = 1; // asserting at()
             }
         }
         /**
@@ -447,19 +457,23 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
          * Construct from encoded nonce.
          * Throws std::invalid_argument if the number of decoded bytes is not crypto_box_NONCEBYTES.
          */
-        nonce(const encoded_bytes& encoded) {
+        nonce(const encoded_bytes& encoded) : overflow(false) {
             std::string decoded = encoded.to_binary();
             if(decoded.size() != crypto_box_NONCEBYTES) {
                 throw std::invalid_argument("incorrect number of decoded bytes");
             }
             bytes = decoded;
         }
+
         /**
          * Increment the sequential part of the nonce by 2.
          * This function does NOT throw an exception on overflow, but delays this until an attempt is made to read the sequential part.
          */
         void increment() {
             unsigned int carry = 2;
+        		if (bytes.size() < 1) {
+        			throw std::overflow_error("Trying to increment an empty nonce");
+        		}
             for(int64_t i = bytes.size()-1; i >= constantbytes && carry > 0; --i) {
                 unsigned int current = *reinterpret_cast<unsigned char *>(&bytes[i]);
                 current += carry;
@@ -467,6 +481,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
                 carry = current >> 8;
             }
             if(carry > 0) {
+            	  sodiumpp_dbg("Nonce overflowed!");
                 overflow = true;
             }
         }
@@ -484,6 +499,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
          */
         encoded_bytes get(encoding enc=encoding::binary) const {
             if(overflow) {
+        				sodiumpp_dbg("We have overflow. Btw: bytes.size="<<bytes.size());
                 throw std::overflow_error("Sequential part of nonce has overflowed");
             } else {
                 return encoded_bytes(encode_from_binary(bytes, enc), enc);
@@ -700,7 +716,7 @@ The random version that generates random nonce itself: TODO?
          */
         std::string unbox(const encoded_bytes& ciphertext, const noncetype& n_override) const {
         		sodiumpp_dbg("I am unboxer at " << ((void*)this) << " going to unbox (nonce override), with k.size()="<<k.size());
-            std::string m = crypto_box_open_afternm(ciphertext.to_binary(), n_override.get().to_binary(), k);
+            std::string m = crypto_box_open_afternm(ciphertext.to_binary(), n_override.get().to_binary(), k.get_string());
             return m;
         }
         /**
