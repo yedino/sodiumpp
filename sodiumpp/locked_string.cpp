@@ -166,6 +166,6 @@ char * locked_string::buffer_writable() noexcept {
 }
 
 size_t locked_string::copy(char *s, size_t len, size_t pos) const {
-	m_str.copy(s, len, pos);
+	return m_str.copy(s, len, pos);
 }
 

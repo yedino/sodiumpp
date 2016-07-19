@@ -186,11 +186,11 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
      * Locks the memory used by the string bytes in memory, preventing it from being swapped out.
      * @throw std::runtime_error if error
      */
-    void mlock(const std::string& bytes);
+    void mlock(std::string& bytes);
     /**
      * Unlocks the memory used by the string bytes, allowing it to be swapped out again.
      */
-    void munlock(const std::string& bytes);
+    void munlock(std::string& bytes);
     
     /**
      * Exception class for cryptographic errors: failed verifications etc.
@@ -203,7 +203,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
     /**
      * Encoding of a series of bytes.
      */
-    enum class encoding {
+    enum encoding {
         binary, /** No special encoding is applied, the bytes are kept as-is. */
         hex, /** The bytes are encoded with two lower case hexadecimal digits per byte. */
         z85 /** The bytes are encoded using Z85 encoding with padding if necessary. */
@@ -343,7 +343,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
          * Copy constructor
          */
         secret_key(const secret_key<P>& other) : secret_bytes(other.secret_bytes), pk(other.pk) {}
-        static_assert(P == key_purpose::box or P == key_purpose::sign, "purposes other than box and sign are not yet supported");
+        static_assert(P == key_purpose::box || P == key_purpose::sign, "purposes other than box and sign are not yet supported");
         /**
          * Default constructor: automatically generates new keypair.
          */
@@ -402,7 +402,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
     public:
         /** The number of bytes allocated to the constant part */
         static const unsigned int constantbytes = crypto_box_NONCEBYTES-sequentialbytes; 
-        static_assert(sequentialbytes <= crypto_box_NONCEBYTES and sequentialbytes > 0, "sequentialbytes can be at most crypto_box_NONCEBYTES and must be greater than 0");
+        static_assert(sequentialbytes <= crypto_box_NONCEBYTES && sequentialbytes > 0, "sequentialbytes can be at most crypto_box_NONCEBYTES and must be greater than 0");
         /**
          * Default constructor: initializes the constant and sequential parts to zeroes.
          */
