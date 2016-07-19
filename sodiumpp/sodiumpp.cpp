@@ -24,6 +24,7 @@
 #include <sodiumpp/sodiumpp.h>
 #include <sodiumpp/z85.hpp>
 #include <cassert>
+#include <vector>
 
 namespace sodiumpp {
 
@@ -54,17 +55,17 @@ std::string sodiumpp::crypto_box(const std::string &m,const std::string &n,const
 	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length", __func__ );
 	check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length", __func__ );
 	size_t mlen = m.size() + crypto_box_ZEROBYTES;
-    unsigned char mpad[mlen];
+	std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_box_ZEROBYTES];
-    unsigned char cpad[mlen];
-    ::crypto_box(cpad,mpad,mlen,
+	std::vector<unsigned char> cpad(mlen);
+    ::crypto_box(cpad.data(),mpad.data(),mlen,
                reinterpret_cast<const unsigned char *>(n.c_str()),
                reinterpret_cast<const unsigned char *>(pk.c_str()),
                reinterpret_cast<const unsigned char *>(sk.c_str())
                );
     return std::string(
-                  reinterpret_cast<char *>(cpad) + crypto_box_BOXZEROBYTES,
+                  reinterpret_cast<char *>(cpad.data()) + crypto_box_BOXZEROBYTES,
                   mlen - crypto_box_BOXZEROBYTES
                   );
 }
@@ -89,16 +90,16 @@ std::string sodiumpp::crypto_box_afternm(const std::string &m,const std::string 
    	check_valid_size( k.size() , crypto_box_BEFORENMBYTES , "incorrect nm-key length" , __func__ );
     check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
     size_t mlen = m.size() + crypto_box_ZEROBYTES;
-    unsigned char mpad[mlen];
+    std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_box_ZEROBYTES];
-    unsigned char cpad[mlen];
-    ::crypto_box_afternm(cpad,mpad,mlen,
+    std::vector<unsigned char> cpad(mlen);
+    ::crypto_box_afternm(cpad.data(),mpad.data(),mlen,
                  reinterpret_cast<const unsigned char *>(n.c_str()),
                  reinterpret_cast<const unsigned char *>(k.c_str())
                  );
     return std::string(
-                  reinterpret_cast<char *>(cpad) + crypto_box_BOXZEROBYTES,
+                  reinterpret_cast<char *>(cpad.data()) + crypto_box_BOXZEROBYTES,
                   mlen - crypto_box_BOXZEROBYTES
                   );
 }
@@ -108,11 +109,11 @@ std::string sodiumpp::crypto_box_open_afternm(const std::string &c,const std::st
     check_valid_size( k.size() , crypto_box_BEFORENMBYTES ,  "incorrect nm-key length" , __func__ );
     check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
     size_t clen = c.size() + crypto_box_BOXZEROBYTES;
-    unsigned char cpad[clen];
+    std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;
     for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_box_BOXZEROBYTES];
-    unsigned char mpad[clen];
-    if (::crypto_box_open_afternm(mpad,cpad,clen,
+	std::vector<unsigned char> mpad(clen);
+    if (::crypto_box_open_afternm(mpad.data(),cpad.data(),clen,
                                   reinterpret_cast<const unsigned char *>(n.c_str()),
                                   reinterpret_cast<const unsigned char *>(k.c_str())
                                   ) != 0)
@@ -120,7 +121,7 @@ std::string sodiumpp::crypto_box_open_afternm(const std::string &c,const std::st
     if (clen < crypto_box_ZEROBYTES)
         throw sodiumpp::crypto_error("ciphertext too short"); // should have been caught by _open
     return std::string(
-                  reinterpret_cast<char *>(mpad) + crypto_box_ZEROBYTES,
+                  reinterpret_cast<char *>(mpad.data()) + crypto_box_ZEROBYTES,
                   clen - crypto_box_ZEROBYTES
                   );
 }
@@ -131,11 +132,11 @@ std::string sodiumpp::crypto_box_open(const std::string &c,const std::string &n,
 	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
 	check_valid_size( n.size() , crypto_box_NONCEBYTES , "incorrect nonce length" , __func__ );
 	size_t clen = c.size() + crypto_box_BOXZEROBYTES;
-    unsigned char cpad[clen];
+    std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;
     for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_box_BOXZEROBYTES];
-    unsigned char mpad[clen];
-    if (::crypto_box_open(mpad,cpad,clen,
+    std::vector<unsigned char> mpad(clen);
+    if (::crypto_box_open(mpad.data(),cpad.data(),clen,
                         reinterpret_cast<const unsigned char *>(n.c_str()),
                         reinterpret_cast<const unsigned char *>(pk.c_str()),
                         reinterpret_cast<const unsigned char *>(sk.c_str())
@@ -144,7 +145,7 @@ std::string sodiumpp::crypto_box_open(const std::string &c,const std::string &n,
     if (clen < crypto_box_ZEROBYTES)
         throw sodiumpp::crypto_error("ciphertext too short"); // should have been caught by _open
     return std::string(
-                  reinterpret_cast<char *>(mpad) + crypto_box_ZEROBYTES,
+                  reinterpret_cast<char *>(mpad.data()) + crypto_box_ZEROBYTES,
                   clen - crypto_box_ZEROBYTES
                   );
 }
@@ -219,13 +220,13 @@ std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n
 	check_valid_size( k.size() , crypto_secretbox_KEYBYTES , "incorrect key length" , __func__ );
 	check_valid_size( n.size() , crypto_secretbox_NONCEBYTES , "incorrect nonce length" , __func__ );
 	size_t mlen = m.size() + crypto_secretbox_ZEROBYTES;
-    unsigned char mpad[mlen];
+    std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_secretbox_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_secretbox_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_secretbox_ZEROBYTES];
-    unsigned char cpad[mlen];
-    ::crypto_secretbox(cpad, mpad, mlen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str()));
+    std::vector<unsigned char> cpad(mlen);
+    ::crypto_secretbox(cpad.data(), mpad.data(), mlen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str()));
     return std::string(
-                  reinterpret_cast<char *>(cpad) + crypto_secretbox_BOXZEROBYTES,
+                  reinterpret_cast<char *>(cpad.data()) + crypto_secretbox_BOXZEROBYTES,
                   mlen - crypto_secretbox_BOXZEROBYTES
                   );
 }
@@ -235,16 +236,16 @@ std::string sodiumpp::crypto_secretbox_open(const std::string &c,const std::stri
 	check_valid_size( k.size() , crypto_secretbox_KEYBYTES , "incorrect key length" , __func__ );
 	check_valid_size( n.size() , crypto_secretbox_NONCEBYTES , "incorrect nonce length" , __func__ );
 	size_t clen = c.size() + crypto_secretbox_BOXZEROBYTES;
-    unsigned char cpad[clen];
+    std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_secretbox_BOXZEROBYTES;++i) cpad[i] = 0;
     for (size_t i = crypto_secretbox_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_secretbox_BOXZEROBYTES];
-    unsigned char mpad[clen];
-    if (::crypto_secretbox_open(mpad,cpad,clen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str())) != 0)
+    std::vector<unsigned char> mpad(clen);
+    if (::crypto_secretbox_open(mpad.data(),cpad.data(),clen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str())) != 0)
         throw sodiumpp::crypto_error("ciphertext fails verification");
     if (clen < crypto_secretbox_ZEROBYTES)
         throw sodiumpp::crypto_error("ciphertext too short"); // should have been caught by _open
     return std::string(
-                  reinterpret_cast<char *>(mpad) + crypto_secretbox_ZEROBYTES,
+                  reinterpret_cast<char *>(mpad.data()) + crypto_secretbox_ZEROBYTES,
                   clen - crypto_secretbox_ZEROBYTES
                   );
 }
@@ -261,19 +262,19 @@ std::string sodiumpp::crypto_sign_open(const std::string &sm_string, const std::
 {
 	check_valid_size( pk_string.size() , crypto_sign_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
 	size_t smlen = sm_string.size();
-    unsigned char m[smlen];
+    std::vector<unsigned char> m(smlen);
     unsigned long long mlen;
     for (size_t i = 0;i < smlen;++i) m[i] = sm_string[i];
     if (::crypto_sign_open(
-                         m,
+                         m.data(),
                          &mlen,
-                         m,
+                         m.data(),
                          smlen,
                          reinterpret_cast<const unsigned char *>(pk_string.c_str())
                          ) != 0)
         throw sodiumpp::crypto_error("ciphertext fails verification");
     return std::string(
-                  reinterpret_cast<char *>(m),
+                  reinterpret_cast<char *>(m.data()),
                   mlen
                   );
 }
@@ -282,18 +283,18 @@ std::string sodiumpp::crypto_sign(const std::string &m_string, const std::string
 {
 	check_valid_size( sk_string.size() , crypto_sign_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
 	size_t mlen = m_string.size();
-    unsigned char m[mlen+crypto_sign_BYTES];
+    std::vector<unsigned char> m(mlen+crypto_sign_BYTES);
     unsigned long long smlen;
     for (size_t i = 0;i < mlen;++i) m[i] = m_string[i];
     ::crypto_sign(
-                m,
+                m.data(),
                 &smlen,
-                m,
+                m.data(),
                 mlen,
                 reinterpret_cast<const unsigned char *>(sk_string.c_str())
                 );
     return std::string(
-                  reinterpret_cast<char *>(m),
+                  reinterpret_cast<char *>(m.data()),
                   smlen
                   );
 }
@@ -332,9 +333,9 @@ std::string sodiumpp::crypto_stream(size_t clen,const std::string &n,const std::
 {
 	check_valid_size( n.size() , crypto_stream_NONCEBYTES , "incorrect nonce length" , __func__ );
 	check_valid_size( k.size() , crypto_stream_KEYBYTES , "incorrect key length" , __func__ );
-	unsigned char c[clen];
-    ::crypto_stream(c, clen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str()));
-    return std::string(reinterpret_cast<char *>(c), clen);
+	std::vector<unsigned char> c(clen);
+    ::crypto_stream(c.data(), clen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str()));
+    return std::string(reinterpret_cast<char *>(c.data()), clen);
 }
 
 std::string sodiumpp::crypto_stream_xor(const std::string &m,const std::string &n,const std::string &k)
@@ -342,13 +343,13 @@ std::string sodiumpp::crypto_stream_xor(const std::string &m,const std::string &
 	check_valid_size( n.size() , crypto_stream_NONCEBYTES , "incorrect nonce length" , __func__ );
 	check_valid_size( k.size() , crypto_stream_KEYBYTES , "incorrect key length" , __func__ );
 	size_t mlen = m.size();
-    unsigned char c[mlen];
-    ::crypto_stream_xor(c,
+    std::vector<unsigned char> c(mlen);
+    ::crypto_stream_xor(c.data(),
                       reinterpret_cast<const unsigned char *>(m.c_str()), mlen,
                       reinterpret_cast<const unsigned char *>(n.c_str()),
                       reinterpret_cast<const unsigned char *>(k.c_str())
                       );
-    return std::string(reinterpret_cast<char *>(c), mlen);
+    return std::string(reinterpret_cast<char *>(c.data()), mlen);
 }
 
 std::string sodiumpp::bin2hex(const std::string& bytes) {
