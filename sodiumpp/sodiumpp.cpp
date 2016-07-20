@@ -57,7 +57,7 @@ std::string sodiumpp::crypto_box(const std::string &m,const std::string &n,const
 	size_t mlen = m.size() + crypto_box_ZEROBYTES;
 	std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
-    for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_box_ZEROBYTES];
+    for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = static_cast<unsigned char>(m[i - crypto_box_ZEROBYTES]);
 	std::vector<unsigned char> cpad(mlen);
     ::crypto_box(cpad.data(),mpad.data(),mlen,
                reinterpret_cast<const unsigned char *>(n.c_str()),
@@ -92,7 +92,7 @@ std::string sodiumpp::crypto_box_afternm(const std::string &m,const std::string 
     size_t mlen = m.size() + crypto_box_ZEROBYTES;
     std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
-    for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_box_ZEROBYTES];
+    for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = static_cast<unsigned char>(m[i - crypto_box_ZEROBYTES]);
     std::vector<unsigned char> cpad(mlen);
     ::crypto_box_afternm(cpad.data(),mpad.data(),mlen,
                  reinterpret_cast<const unsigned char *>(n.c_str()),
@@ -111,7 +111,7 @@ std::string sodiumpp::crypto_box_open_afternm(const std::string &c,const std::st
     size_t clen = c.size() + crypto_box_BOXZEROBYTES;
     std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;
-    for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_box_BOXZEROBYTES];
+    for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = static_cast<unsigned char>(c[i - crypto_box_BOXZEROBYTES]);
 	std::vector<unsigned char> mpad(clen);
     if (::crypto_box_open_afternm(mpad.data(),cpad.data(),clen,
                                   reinterpret_cast<const unsigned char *>(n.c_str()),
@@ -134,7 +134,7 @@ std::string sodiumpp::crypto_box_open(const std::string &c,const std::string &n,
 	size_t clen = c.size() + crypto_box_BOXZEROBYTES;
     std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_box_BOXZEROBYTES;++i) cpad[i] = 0;
-    for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_box_BOXZEROBYTES];
+    for (size_t i = crypto_box_BOXZEROBYTES;i < clen;++i) cpad[i] = static_cast<unsigned char>(c[i - crypto_box_BOXZEROBYTES]);
     std::vector<unsigned char> mpad(clen);
     if (::crypto_box_open(mpad.data(),cpad.data(),clen,
                         reinterpret_cast<const unsigned char *>(n.c_str()),
@@ -222,7 +222,7 @@ std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n
 	size_t mlen = m.size() + crypto_secretbox_ZEROBYTES;
     std::vector<unsigned char> mpad(mlen);
     for (size_t i = 0;i < crypto_secretbox_ZEROBYTES;++i) mpad[i] = 0;
-    for (size_t i = crypto_secretbox_ZEROBYTES;i < mlen;++i) mpad[i] = m[i - crypto_secretbox_ZEROBYTES];
+    for (size_t i = crypto_secretbox_ZEROBYTES;i < mlen;++i) mpad[i] = static_cast<unsigned char>(m[i - crypto_secretbox_ZEROBYTES]);
     std::vector<unsigned char> cpad(mlen);
     ::crypto_secretbox(cpad.data(), mpad.data(), mlen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str()));
     return std::string(
@@ -238,7 +238,7 @@ std::string sodiumpp::crypto_secretbox_open(const std::string &c,const std::stri
 	size_t clen = c.size() + crypto_secretbox_BOXZEROBYTES;
     std::vector<unsigned char> cpad(clen);
     for (size_t i = 0;i < crypto_secretbox_BOXZEROBYTES;++i) cpad[i] = 0;
-    for (size_t i = crypto_secretbox_BOXZEROBYTES;i < clen;++i) cpad[i] = c[i - crypto_secretbox_BOXZEROBYTES];
+    for (size_t i = crypto_secretbox_BOXZEROBYTES;i < clen;++i) cpad[i] = static_cast<unsigned char>(c[i - crypto_secretbox_BOXZEROBYTES]);
     std::vector<unsigned char> mpad(clen);
     if (::crypto_secretbox_open(mpad.data(),cpad.data(),clen, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(k.c_str())) != 0)
         throw sodiumpp::crypto_error("ciphertext fails verification");
@@ -264,7 +264,7 @@ std::string sodiumpp::crypto_sign_open(const std::string &sm_string, const std::
 	size_t smlen = sm_string.size();
     std::vector<unsigned char> m(smlen);
     unsigned long long mlen;
-    for (size_t i = 0;i < smlen;++i) m[i] = sm_string[i];
+    for (size_t i = 0;i < smlen;++i) m[i] = static_cast<unsigned char>(sm_string[i]);
     if (::crypto_sign_open(
                          m.data(),
                          &mlen,
@@ -285,7 +285,7 @@ std::string sodiumpp::crypto_sign(const std::string &m_string, const std::string
 	size_t mlen = m_string.size();
     std::vector<unsigned char> m(mlen+crypto_sign_BYTES);
     unsigned long long smlen;
-    for (size_t i = 0;i < mlen;++i) m[i] = m_string[i];
+    for (size_t i = 0;i < mlen;++i) m[i] = static_cast<unsigned char>(m_string[i]);
     ::crypto_sign(
                 m.data(),
                 &smlen,
