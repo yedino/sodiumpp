@@ -338,7 +338,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
         /**
          * Construct a secret key from a pregenerated public and secret key.
          */
-        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(locked_string::move_from_not_locked_string(secret_bytes.to_binary())) {}
+        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(secret_bytes.to_binary()) {}
         /**
          * Copy constructor
          */
@@ -349,10 +349,13 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
          */
         secret_key() {
             if(P == key_purpose::box) {
-                secret_bytes = locked_string(crypto_box_SECRETKEYBYTES);
+                locked_string tmp(crypto_box_SECRETKEYBYTES); // clang work around
+                secret_bytes = tmp;
                 pk.bytes = crypto_box_keypair(secret_bytes);
+                //pk.bytes = locked_string(crypto_box_SECRETKEYBYTES);
             } else if(P == key_purpose::sign) {
-                secret_bytes = locked_string(crypto_sign_SECRETKEYBYTES);
+                locked_string tmp(crypto_sign_SECRETKEYBYTES); // clang work around
+                secret_bytes = tmp;
                 pk.bytes = crypto_sign_keypair(secret_bytes);
             } else {
                 // Should be caught by the static_assert above

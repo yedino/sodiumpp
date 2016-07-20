@@ -22,13 +22,13 @@ class locked_string final
              * for move construction for std::string use static methods:
              * move_from_locked_string() and move_from_not_locked_string
              */
-            explicit locked_string(std::string && str) noexcept; ///< only move, not call mlock()
+            //explicit locked_string(std::string && str) noexcept; ///< only move, not call mlock()
     public:
             locked_string() = default;
             locked_string(const locked_string &);
-            locked_string(locked_string &&) = default;
+            locked_string(locked_string &&other);
             locked_string & operator=(const locked_string &);
-            locked_string & operator=(locked_string &&) = default;
+            locked_string & operator=(locked_string &&other);
 
 			/**
 			 * @brief unsafe_create Creating locked string from obviously unsafe source.
@@ -37,8 +37,8 @@ class locked_string final
 			 * @return locked_string UNSAFE!
 			 * @{
 			 */
-			static locked_string unsafe_create(const std::string &str);
-			static locked_string unsafe_create(const char *c_str);
+//			static locked_string unsafe_create(const std::string &str);
+//			static locked_string unsafe_create(const char *c_str);
 			///@}
 
             // TODO: prove with standard c++11, that default move constructor of std::string
@@ -72,14 +72,14 @@ class locked_string final
 			 * 				It MUST BE already mlocked() by caler.
              * @return locked_string object
              */
-            static locked_string move_from_locked_string(std::string &&str);
+//            static locked_string move_from_locked_string(std::string &&str);
 
             /**
              * @brief move_from_not_locked_string
              * @param str - the data, it will be "destroyed" (moved from, so caller should not use it later).
              * @return locked_string object
              */
-            static locked_string move_from_not_locked_string(std::string &&str);
+//            static locked_string move_from_not_locked_string(std::string &&str);
             ~locked_string();
 
             /**
