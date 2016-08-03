@@ -349,13 +349,11 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
          */
         secret_key() {
             if(P == key_purpose::box) {
-                locked_string tmp(crypto_box_SECRETKEYBYTES); // clang work around
-                secret_bytes = tmp;
+                secret_bytes = locked_string(crypto_box_SECRETKEYBYTES);
                 pk.bytes = crypto_box_keypair(secret_bytes);
                 //pk.bytes = locked_string(crypto_box_SECRETKEYBYTES);
             } else if(P == key_purpose::sign) {
-                locked_string tmp(crypto_sign_SECRETKEYBYTES); // clang work around
-                secret_bytes = tmp;
+                secret_bytes = locked_string(crypto_sign_SECRETKEYBYTES);
                 pk.bytes = crypto_sign_keypair(secret_bytes);
             } else {
                 // Should be caught by the static_assert above
