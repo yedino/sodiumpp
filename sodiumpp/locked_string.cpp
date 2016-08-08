@@ -4,9 +4,9 @@
 
 using namespace sodiumpp;
 
-locked_string::locked_string(std::string &&str) noexcept
+/*locked_string::locked_string(std::string &&str) noexcept
  : m_str(std::move(str))
-{}
+{}*/
 
 locked_string::locked_string(const std::string &str) {
 	// TODO factor out the common part of all this constructors etc
@@ -42,6 +42,10 @@ locked_string::locked_string(const locked_string & str) {
 	assert(data_ptr == &m_str[0]);
 }
 
+locked_string::locked_string(locked_string &&other) {
+	*this = other; // copy (small string optimalization)
+}
+
 locked_string & locked_string::operator=(const locked_string & str) {
 	if (this == &str) return *this;
 	sodiumpp::memzero(m_str);
@@ -56,16 +60,21 @@ locked_string & locked_string::operator=(const locked_string & str) {
 	return *this;
 }
 
-locked_string locked_string::unsafe_create(const std::string &str) {
+locked_string & locked_string::operator=(locked_string &&other) {
+	*this = other; // copy (small string optimalization)
+	return *this;
+}
+
+/*locked_string locked_string::unsafe_create(const std::string &str) {
 	std::string to_unsafe_move(str);
 	return move_from_not_locked_string(std::move(to_unsafe_move));
 }
 
 locked_string locked_string::unsafe_create(const char *c_str) {
 	return unsafe_create(std::string(c_str));
-}
+}*/
 
-locked_string locked_string::move_from_locked_string(std::string &&str) {
+/*locked_string locked_string::move_from_locked_string(std::string &&str) {
 	locked_string ret(std::move(str));
 	return ret;
 }
@@ -74,7 +83,7 @@ locked_string locked_string::move_from_not_locked_string(std::string &&str) {
     sodiumpp::mlock(str);
     locked_string ret(std::move(str));
     return ret;
-}
+}*/
 
 locked_string::~locked_string() {
     sodiumpp::memzero(m_str);

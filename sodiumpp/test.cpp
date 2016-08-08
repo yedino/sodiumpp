@@ -89,7 +89,7 @@ go_bandit([](){
             data += char(0);
             data += "1234";
         });
-        it("can move from not locked", [&](){
+/*        it("can move from not locked", [&](){
             const char * const source_data_ptr = &data[0];
             locked_string ls = locked_string::move_from_not_locked_string(std::move(data));
             AssertThat(source_data_ptr, Equals(&ls[0]));
@@ -99,7 +99,7 @@ go_bandit([](){
             sodiumpp::mlock(data);
             locked_string ls = locked_string::move_from_not_locked_string(std::move(data));
             AssertThat(source_data_ptr, Equals(&ls[0]));
-        });
+        });*/
         it("can create copy", [&](){
             locked_string ls(data);
             AssertThat(ls.size(), Equals(data.size()));
@@ -124,7 +124,7 @@ go_bandit([](){
             AssertThat(ls == ls2, Equals(true));
             AssertThat(ls2 == ls3, Equals(true));
         });
-        it("can move", [&](){
+/*        it("can move", [&](){
               locked_string ls(data);
               const char* const ls_data_ptr = &ls[0];
               locked_string ls2(std::move(ls)); // move constructor
@@ -135,7 +135,7 @@ go_bandit([](){
               ls3 = std::move(ls2); // move assigment
               const char* const ls3_data_ptr = &ls3[0];
               AssertThat(ls2_data_ptr == ls3_data_ptr, Equals(true));
-        });
+        });*/
     });
 
 	describe("crypto_sign_detached", [](){

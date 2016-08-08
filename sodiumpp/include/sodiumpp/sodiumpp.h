@@ -338,7 +338,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
         /**
          * Construct a secret key from a pregenerated public and secret key.
          */
-        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(locked_string::move_from_not_locked_string(secret_bytes.to_binary())) {}
+        secret_key(const public_key<P>& pk, const encoded_bytes& secret_bytes) : pk(pk), secret_bytes(secret_bytes.to_binary()) {}
         /**
          * Copy constructor
          */
@@ -351,6 +351,7 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
             if(P == key_purpose::box) {
                 secret_bytes = locked_string(crypto_box_SECRETKEYBYTES);
                 pk.bytes = crypto_box_keypair(secret_bytes);
+                //pk.bytes = locked_string(crypto_box_SECRETKEYBYTES);
             } else if(P == key_purpose::sign) {
                 secret_bytes = locked_string(crypto_sign_SECRETKEYBYTES);
                 pk.bytes = crypto_sign_keypair(secret_bytes);
