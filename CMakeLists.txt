@@ -6,6 +6,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -g")
 
+if(CYGWIN)
+	add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+endif()
+
 if(SODIUMPP_MACPORTS)
     include_directories("/opt/local/include")
     link_directories("/opt/local/lib")
