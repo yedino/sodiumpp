@@ -33,7 +33,8 @@ set(cxx-sources
 )
 
 file(GLOB cxx-headers
-    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/sodiumpp/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/sodiumpp/*.hpp"
 )
 
 set(MODULE_NAME sodiumpp)
