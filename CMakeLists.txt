@@ -11,7 +11,7 @@ if(CYGWIN)
 endif()
 
 if(APPLE)
-set(CMAKE_INSTALL_NAME_DIR @rpath)
+    set(CMAKE_MACOSX_RPATH ON)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
