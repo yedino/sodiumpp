@@ -10,6 +10,10 @@ if(CYGWIN)
 	add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif()
 
+if(APPLE)
+set(CMAKE_INSTALL_NAME_DIR @rpath)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(Sodium REQUIRED)
 
@@ -33,6 +37,7 @@ file(GLOB cxx-headers
 )
 
 set(MODULE_NAME sodiumpp)
+
 
 if(SODIUMPP_STATIC)
     add_library(${MODULE_NAME} STATIC ${cxx-sources} ${cxx-headers})
