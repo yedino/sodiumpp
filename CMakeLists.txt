@@ -11,7 +11,7 @@ if(CYGWIN)
 endif()
 
 if(APPLE)
-set(CMAKE_INSTALL_NAME_DIR @rpath)
+    set(CMAKE_MACOSX_RPATH ON)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -33,7 +33,8 @@ set(cxx-sources
 )
 
 file(GLOB cxx-headers
-    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/sodiumpp/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sodiumpp/include/sodiumpp/*.hpp"
 )
 
 set(MODULE_NAME sodiumpp)
