@@ -531,7 +531,8 @@ inline void check_valid_size(T1 current, T2 expected, const char * name, const c
 
     template <unsigned int sequentialbytes>
     std::ostream& operator<<(std::ostream& s, nonce<sequentialbytes> n) {
-        s << bin2hex(n.constant()) << " - " << bin2hex(n.sequential());
+        //s << bin2hex(n.constant()) << " - " << bin2hex(n.sequential());
+        s << bin2hex(n.get_constant().bytes) << " - " << bin2hex(n.get_sequential().bytes);
         return s;
     }
 
