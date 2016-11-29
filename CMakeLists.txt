@@ -1,7 +1,8 @@
 cmake_minimum_required (VERSION 2.6)
 project (sodiumpp)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -fPIE")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -fPIE")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -g")
@@ -38,7 +39,6 @@ file(GLOB cxx-headers
 )
 
 set(MODULE_NAME sodiumpp)
-
 
 if(SODIUMPP_STATIC)
     add_library(${MODULE_NAME} STATIC ${cxx-sources} ${cxx-headers})
