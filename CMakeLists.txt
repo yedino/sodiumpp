@@ -44,12 +44,13 @@ if(SODIUMPP_STATIC)
     add_library(${MODULE_NAME} STATIC ${cxx-sources} ${cxx-headers})
 else()
     add_library(${MODULE_NAME} SHARED ${cxx-sources} ${cxx-headers})
-endif()
 
-target_link_libraries(sodiumpp
-    PUBLIC
-    ${SODIUM_LIBRARY}
-)
+	target_link_libraries(sodiumpp
+	    PUBLIC
+	    ${SODIUM_LIBRARY}
+	)
+
+endif()
 
 if(SODIUMPP_EXAMPLE)
     add_executable(example sodiumpp/example.cpp)
