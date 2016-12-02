@@ -59,15 +59,16 @@ std::string sodiumpp::crypto_box(const std::string &m,const std::string &n,const
     for (size_t i = 0;i < crypto_box_ZEROBYTES;++i) mpad[i] = 0;
     for (size_t i = crypto_box_ZEROBYTES;i < mlen;++i) mpad[i] = static_cast<unsigned char>(m[i - crypto_box_ZEROBYTES]);
 	std::vector<unsigned char> cpad(mlen);
-    ::crypto_box(cpad.data(),mpad.data(),mlen,
+    if(::crypto_box(cpad.data(),mpad.data(),mlen,
                reinterpret_cast<const unsigned char *>(n.c_str()),
                reinterpret_cast<const unsigned char *>(pk.c_str()),
                reinterpret_cast<const unsigned char *>(sk.c_str())
-               );
+               ) == 0)
     return std::string(
                   reinterpret_cast<char *>(cpad.data()) + crypto_box_BOXZEROBYTES,
                   mlen - crypto_box_BOXZEROBYTES
                   );
+    throw sodiumpp::crypto_error("bad crypto_box");
 }
 
 std::string sodiumpp::crypto_box_keypair(locked_string& sk_string)
@@ -82,8 +83,9 @@ std::string sodiumpp::crypto_box_beforenm(const std::string &pk, const std::stri
 	check_valid_size( pk.size() , crypto_box_PUBLICKEYBYTES , "incorrect public-key length" , __func__ );
 	check_valid_size( sk.size() , crypto_box_SECRETKEYBYTES , "incorrect secret-key length" , __func__ );
     std::string k(crypto_box_BEFORENMBYTES, 0);
-    ::crypto_box_beforenm(reinterpret_cast<unsigned char *>(&k[0]), reinterpret_cast<const unsigned char *>(&pk[0]), reinterpret_cast<const unsigned char *>(&sk[0]));
+    if(::crypto_box_beforenm(reinterpret_cast<unsigned char *>(&k[0]), reinterpret_cast<const unsigned char *>(&pk[0]), reinterpret_cast<const unsigned char *>(&sk[0])) == 0)
     return k;
+    throw sodiumpp::crypto_error("bad crypto_box_beforenm");
 }
 
 std::string sodiumpp::crypto_box_afternm(const std::string &m,const std::string &n,const std::string &k) {
@@ -198,8 +200,9 @@ std::string sodiumpp::crypto_scalarmult(const std::string &n,const std::string &
     unsigned char q[crypto_scalarmult_BYTES];
 	check_valid_size( n.size() , crypto_scalarmult_SCALARBYTES , "incorrect scalar length" , __func__ );
 	check_valid_size( p.size() , crypto_scalarmult_BYTES , "incorrect element length" , __func__ );
-	::crypto_scalarmult(q, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(p.c_str()));
+    if(::crypto_scalarmult(q, reinterpret_cast<const unsigned char *>(n.c_str()), reinterpret_cast<const unsigned char *>(p.c_str())) == 0)
     return std::string(reinterpret_cast<char *>(q), sizeof q);
+    throw sodiumpp::crypto_error("bad crypto_scalarmult");
 }
 
 sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_string &priv,const std::string &pub) {
@@ -208,11 +211,12 @@ sodiumpp::locked_string sodiumpp::key_agreement_locked(const sodiumpp::locked_st
 	locked_string q(crypto_scalarmult_BYTES); // allocate locked memory
 
 		assert( q.size() == crypto_scalarmult_BYTES ); // because that many bytes will be written by function:
-    ::crypto_scalarmult(
+    if(::crypto_scalarmult(
 			reinterpret_cast<unsigned char *>(q.buffer_writable()), // out data
 			reinterpret_cast<const unsigned char *>(priv.c_str()),
-			reinterpret_cast<const unsigned char *>(pub.c_str()));
+            reinterpret_cast<const unsigned char *>(pub.c_str())) == 0)
     return q;
+    throw sodiumpp::crypto_error("bad crypto_scalarmult");
 }
 
 std::string sodiumpp::crypto_secretbox(const std::string &m,const std::string &n,const std::string &k)
