@@ -55,7 +55,9 @@ namespace sodiumpp {
 
 // for testing against errors:
 template<typename T1, typename T2>
-inline void check_valid_size(T1 current, T2 expected, const char * name, const char * funcname) {
+inline void check_valid_size(T1 current, T2 expected, const char * name, const char * funcname
+			, typename std::enable_if<std::is_signed<T1>::value == std::is_signed<T2>::value >::type* = 0) {
+
 	if (current != expected) {
 		throw std::invalid_argument(
 			std::string(name)

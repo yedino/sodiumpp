@@ -364,7 +364,7 @@ std::string sodiumpp::bin2hex(const std::string& bytes) {
 }
 
 std::string sodiumpp::hex2bin(const std::string& bytes) {
-	check_valid_size( bytes.size() % 2 , 0 , "length must be even" , __func__ );
+	check_valid_size( bytes.size() % 2 , 0u , "length must be even" , __func__ );
 	std::string bin(bytes.size()/2, 0);
     size_t binlen;
     sodium_hex2bin(reinterpret_cast<unsigned char *>(&bin[0]), bin.size(), &bytes[0], bytes.size(), nullptr, &binlen, nullptr);
